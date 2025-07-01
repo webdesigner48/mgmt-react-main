@@ -101,11 +101,7 @@
   background-color: rgba(236, 236, 236, 0.1);
 }
 
-/* .popup-sidebar-nav__list li.active {
-  background-color: rgba(78, 87, 109, 0.85);
-  border-right: 3px solid #d1d1d180;
-  color: #1dbb86c0;
-} */
+
 
 .popup-sidebar-nav__list li svg {
   flex-shrink: 0;
