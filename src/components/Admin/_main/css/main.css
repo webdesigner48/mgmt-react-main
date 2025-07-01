@@ -1,0 +1,142 @@
+/* Your existing CSS remains the same, plus these enhancements: */
+
+.admin-home-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #151515cb;
+  backdrop-filter: blur(7px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1270;
+  /* Enhanced transitions */
+  transition: opacity 1s ease, visibility 1s ease;
+}
+
+/* Fade animations for overlay */
+.admin-home-overlay.fade-in {
+  opacity: 1;
+  visibility: visible;
+}
+
+.admin-home-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.admin-home-modal {
+
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  width: 95%;
+  max-width: 1200px;
+  height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  /* border: 1px solid rgba(236, 236, 236, 0.2); */
+  /* Enhanced transitions */
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Modal fade animations */
+.admin-home-modal.modal-fade-in {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.admin-home-modal.modal-fade-out {
+  transform: scale(0.95) translateY(-20px);
+  opacity: 0;
+}
+
+.admin-home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.2);
+  background-color: #353535;
+}
+
+.admin-home-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #ececec;
+  font-weight: 500;
+}
+
+.admin-home-close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: #ececec;
+  transition: all 0.2s ease;
+}
+
+.admin-home-close-button:hover {
+  background-color: rgba(236, 236, 236, 0.1);
+  color: #fff;
+}
+
+.admin-home-content {
+  flex: 1;
+  overflow: hidden;
+  gap: 1rem;
+  display: flex;
+}
+
+.admin-content-layout {
+  display: flex;
+  height: 100%;
+  gap: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.admin-home-content p {
+  margin: 0;
+  color: #ececec;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Enhanced view transitions */
+.admin-panel-content {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.admin-panel-content.fade-in {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.admin-panel-content.fade-out {
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+/* Optional: Add subtle entrance animation for content */
+.admin-home-content>* {
+  animation: contentSlideIn 0.4s ease 0.1s both;
+}
+
+@keyframes contentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

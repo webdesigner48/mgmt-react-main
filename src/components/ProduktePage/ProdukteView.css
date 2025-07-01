@@ -1,0 +1,52 @@
+.produkte-view-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Use vh for full viewport height */
+  width: 100%;
+  padding: 20px; /* Add some padding so the blurred box doesn't touch edges */
+  box-sizing: border-box;
+  position: absolute; /* To be centered on the page */
+  top: 0;
+  left: 0;
+  opacity: 0; /* Start transparent for fade-in */
+  animation: fadeInProdukteView 0.4s ease forwards;
+}
+
+@keyframes fadeInProdukteView {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Add a class for fade-out if needed, or handle in JS by changing class */
+.produkte-view-container.fade-out {
+  animation: fadeOutProdukteView 0.4s ease forwards;
+}
+
+@keyframes fadeOutProdukteView {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.produkte-view-content {
+  width: 700px; /* Fixed width */
+  height: 600px; /* Fixed height */
+  /* max-width and max-height are removed as fixed dimensions are given */
+  background-color: rgba(42, 47, 58, 0.5); /* Slightly transparent background for the glass effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  border-radius: 8px;
+  border: 1px solid rgba(236, 236, 236, 0.7); /* #ececec with 70% opacity */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ececec;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}

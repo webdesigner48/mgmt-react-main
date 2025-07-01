@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="512" height="512" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+  <g>
+    <g data-name="01 align center">
+      <path d="M2 21V3a1 1 0 0 1 1-1h5V0H3a3 3 0 0 0-3 3v18a3 3 0 0 0 3 3h5v-2H3a1 1 0 0 1-1-1Z" fill="#ececec" opacity="1" data-original="#000000" class=""></path>
+      <path d="m23.123 9.879-4.586-4.586-1.414 1.414 4.264 4.264L5 11v2l16.443-.029-4.322 4.322 1.414 1.414 4.586-4.586a3 3 0 0 0 .002-4.242Z" fill="#ececec" opacity="1" data-original="#000000" class=""></path>
+    </g>
+  </g>
+</svg>

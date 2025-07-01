@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske -->
+  <defs>
+    <clipPath id="circle-clip-ukraine">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-ukraine)">
+    
+    <!-- Blauer Streifen (oben) -->
+    <rect width="100" height="50" y="0" style="fill:#005BBB;"/>
+    
+    <!-- Gelber Streifen (unten) -->
+    <rect width="100" height="50" y="50" style="fill:#FFD500;"/>
+
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

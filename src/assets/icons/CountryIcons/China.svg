@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske -->
+  <defs>
+    <clipPath id="circle-clip-china">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+    <!-- Definiert die Form eines 5-zackigen Sterns -->
+    <path id="star-china" d="M10 0 L13 6 L20 7 L15 12 L16 19 L10 16 L4 19 L5 12 L0 7 L7 6 Z"/>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-china)">
+    
+    <!-- Roter Hintergrund -->
+    <rect width="100" height="100" style="fill:#EE1C25;"/>
+
+    <!-- Gruppe für die fünf gelben Sterne -->
+    <g style="fill:#FFFF00;">
+        <!-- Grosser Stern -->
+        <use xlink:href="#star-china" transform="translate(15, 15) scale(1.6)"/>
+        
+        <!-- Vier kleinere Sterne - weiter nach rechts verschoben -->
+        <use xlink:href="#star-china" transform="translate(48, 10) scale(0.6) rotate(20)"/>
+        <use xlink:href="#star-china" transform="translate(56, 20) scale(0.6) rotate(40)"/>
+        <use xlink:href="#star-china" transform="translate(56, 32) scale(0.6) rotate(65)"/>
+        <use xlink:href="#star-china" transform="translate(48, 42) scale(0.6) rotate(85)"/>
+    </g>
+
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>
+

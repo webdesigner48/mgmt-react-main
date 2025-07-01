@@ -1,0 +1,481 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #2a2f3a;
+  z-index: 1000;
+  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 770px) {
+  
+  .sidebar:not(.expanded) {
+    width: 64px !important; 
+    background-color: transparent !important; 
+  }
+
+  .sidebar:not(.expanded) .sidebar-lower-interactive-area {
+    display: none !important; /* Hide the entire lower section (settings, company info, etc.) */
+  }
+
+  /* Styles for when sidebar IS click-expanded on narrow screens */
+  .sidebar.expanded {
+    width: 250px !important; /* Ensure full expanded width */
+    background-color: #2a2f3a !important; /* Ensure background is visible when expanded */
+  }
+
+  .sidebar.expanded .sidebar-lower-interactive-area {
+    display: flex !important; /* Show the lower section */
+  }
+  
+  /* Ensure texts inside the lower area are visible when sidebar is click-expanded on narrow screens */
+   .sidebar.expanded .settings-text,
+   .sidebar.expanded .company-info {
+    opacity: 1 !important; 
+  }
+}
+
+.burger-menu-wrapper {
+  position: relative; /* For tooltip positioning */
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px; /* Increased from 20px to create more space below */
+  padding-left: 12px; /* Positions the button from the left edge, 60px (sidebar) - 24px (button) / 2 = 18px for centering in collapsed state */
+  width: 100%; /* Ensure wrapper takes full width for padding to work as expected */
+  box-sizing: border-box; 
+}
+
+.burger-menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 11px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  /* Add transition for opacity */
+  transition: background-color 0.2s ease-in-out, opacity 0.3s ease; 
+}
+
+.burger-menu-button:hover {
+  background-color: #3b4252;
+  opacity: 0.7; /* Hover opacity */
+}
+
+/* Styles for when the menu is expanded (clicked) */
+.burger-menu-button.expanded {
+  background-color: #3b4252; /* Keep hover background color */
+  opacity: 0.7; /* Keep hover opacity, or set to a specific clicked opacity if different */
+}
+
+.burger-menu-button:active,
+.burger-menu-button.expanded:active {
+  opacity: 1 !important; /* Initial opacity on click, !important to override others if needed */
+  transition: opacity 0.05s ease; /* Very fast transition for the immediate click effect */
+}
+
+.burger-hover-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: fixed; /* Changed from absolute to fixed */
+  top: 65px; 
+  left: 12px; 
+  background-color: #ecececc4;
+  color: #333842;
+  padding: 2px;
+  border-radius: 5px;
+  font-size: 0.88em;
+  white-space: nowrap; /* Ensures width is based on content */
+  z-index: 1001; /* Above sidebar */
+  transform: scale(0.5); /* Initial size for the animation */
+  transform-origin: top left; /* Scale from the top-left corner */
+  /* Defines transitions for when the tooltip hides: opacity/transform animate, then visibility changes. */
+  transition: opacity 0.2s ease-in-out, 
+              transform 0.2s ease-in-out, 
+              visibility 0s linear 0.2s; 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align content (tooltip-text-container) to the left */
+  pointer-events: none; /* Tooltip should not capture mouse events */
+}
+
+/* Only show tooltip when burger button is hovered, not the entire wrapper */
+.burger-menu-button:hover + .burger-hover-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1); /* Grow to full size on hover */
+  /* Defines transitions for when the tooltip appears: all properties change immediately or start animating immediately. */
+  transition: opacity 0.2s ease-in-out 0s, 
+              transform 0.2s ease-in-out 0s, 
+              visibility 0s linear 0s;
+}
+
+.tooltip-text-container {
+  background-color: #ececec00; /* Match tooltip background */
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sidebar-content { /* Renamed from .sidebar-left-content */
+  color: #ececec;
+  padding: 0 10px;
+}
+
+/* New styles for generic sidebar items */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #ececec;
+  cursor: pointer;
+  padding: 10px; /* Padding inside the button */
+  width: 100%;
+  border-radius: 4px;
+  transition: background-color 0.2s ease-in-out, opacity 0.3s ease-in-out;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding-left: 12px;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(59, 66, 82, 0.5); /* #3b4252 with 50% opacity */
+}
+
+/* Consolidated active state */
+.sidebar-item.active {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
+}
+
+.sidebar-item.active:hover {
+  background-color: transparent; /* Ensure no background change on hover for active item */
+}
+
+.sidebar-item svg {
+  fill: #ececec; 
+  width: 20px; 
+  min-width: 20px; 
+  margin-right: 15px; 
+}
+
+.sidebar-item-text {
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  font-size: 1.09em; /* Consistent with settings-text */
+}
+
+/* Show text when sidebar is expanded or hovered */
+.sidebar.expanded .sidebar-item-text,
+.sidebar.hovered .sidebar-item-text {
+  opacity: 1;
+}
+
+.sidebar-top-fixed-area {
+  width: 100%;
+}
+
+.sidebar-hover-expand-trigger-area {
+  flex-grow: 1;
+  width: 100%; 
+}
+
+/* New styles for the settings area and item */
+.sidebar-lower-interactive-area {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Takes up remaining vertical space below the top fixed area */
+  width: 100%;
+}
+
+.sidebar-scrollable-content {
+  flex-grow: 1; /* Allows this area to take available space and scroll if content exceeds it */
+  overflow-y: auto; /* Enable vertical scrolling for chat history etc. when expanded */
+  overflow-x: hidden; /* Prevent horizontal scrolling by default */
+  /* Add some padding if needed, e.g., padding: 0 10px; */
+}
+
+/* Hide scrollbar when sidebar is collapsed */
+.sidebar:not(.expanded) .sidebar-scrollable-content {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.sidebar-settings-area {
+  padding: 10px 12px; /* Consistent padding with burger menu wrapper */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #ececec;
+  cursor: pointer;
+  padding: 10px; /* Padding inside the button */
+  width: 100%;
+  border-radius: 20px;
+  transition: background-color 0.2s ease-in-out;
+  box-sizing: border-box;
+  margin-bottom: 20px; /* Shift the entire item 10px higher than 20px */
+}
+
+.settings-item:hover {
+  background-color: rgba(59, 66, 82, 0.5); /* #3b4252 with 50% opacity */
+}
+
+.settings-item svg {
+  fill: #ececec; 
+  width: 21px;
+  min-width: 21px; 
+}
+
+.settings-text {
+  margin-left: 15px; /* Adjusted from 8px to 10px for better spacing */
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  font-size: 1.09em;
+}
+
+/* Show text when sidebar is expanded or hovered */
+.sidebar.expanded .settings-text,
+.sidebar.hovered .settings-text {
+  opacity: 1;
+}
+
+/* New styles for company info text */
+.company-info {
+  color: #adb5bda6; /* Slightly dimmer color for secondary info */
+  font-size: 0.83em;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out 0.1s; /* Matches other text fade-in */
+  padding-left: 15px; /* Aligns with "Einstellungen" text content */
+  margin-bottom: 8px;
+}
+
+.sidebar.expanded .company-info,
+.sidebar.hovered .company-info {
+  opacity: 1;
+}
+
+.company-info-line {
+  margin: 0 0 2px 0; /* Reset paragraph default margins, add small space below each line */
+  white-space: nowrap; /* Prevent wrapping when sidebar is collapsed */
+}
+.datetime-info {
+  margin-top: 12px;
+  padding: 12px 8px 8px 8px;
+  border-top: 1px solid rgba(236, 236, 236, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.datetime-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  padding: 2px 0;
+  transition: all 0.2s ease;
+}
+
+.datetime-item:last-of-type {
+  margin-bottom: 8px;
+}
+
+.datetime-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.datetime-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  color: #ececec;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.datetime-item:hover .datetime-icon {
+  opacity: 1;
+}
+
+.datetime-text {
+  font-size: 11px;
+  color: #ececec;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.datetime-item:hover .datetime-text {
+  opacity: 1;
+}
+
+.timezone-info {
+  text-align: center;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(236, 236, 236, 0.08);
+}
+
+.timezone-text {
+  font-size: 9px;
+  color: #ececec;
+  opacity: 0.6;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: opacity 0.2s ease;
+}
+
+.timezone-info:hover .timezone-text {
+  opacity: 0.8;
+}
+
+
+.sidebar.collapsed .datetime-info {
+  display: none;
+}
+
+.sidebar.hovered .datetime-info {
+  display: block;
+  animation: fadeInDateTime 0.3s ease;
+}
+
+/* Animation for datetime appearance */
+@keyframes fadeInDateTime {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.sidebar.expanded .datetime-info {
+  margin-top: 15px;
+  padding: 15px 10px 10px 10px;
+}
+
+.sidebar.expanded .datetime-item {
+  margin-bottom: 8px;
+  padding: 3px 0;
+}
+
+.sidebar.expanded .datetime-text {
+  font-size: 12px;
+}
+
+.sidebar.expanded .timezone-text {
+  font-size: 10px;
+}
+
+/* Dark theme variations */
+.sidebar.dark-theme .datetime-info {
+  background: rgba(0, 0, 0, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar.dark-theme .datetime-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar.dark-theme .timezone-info {
+  border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Loading state for initial render */
+.datetime-info.loading {
+  opacity: 0.5;
+}
+
+.datetime-info.loading .datetime-text {
+  color: rgba(236, 236, 236, 0.5);
+}
+
+/* Smooth transitions for all elements */
+.datetime-info * {
+  transition: all 0.2s ease;
+}
+
+/* Focus states for accessibility */
+.datetime-item:focus {
+  outline: 1px solid rgba(236, 236, 236, 0.3);
+  border-radius: 4px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .datetime-text {
+    color: #ffffff;
+    opacity: 1;
+  }
+  
+  .datetime-icon {
+    opacity: 1;
+  }
+  
+  .timezone-text {
+    color: #ffffff;
+    opacity: 0.8;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .datetime-info,
+  .datetime-item,
+  .datetime-icon,
+  .datetime-text,
+  .timezone-text {
+    transition: none;
+  }
+  
+  @keyframes fadeInDateTime {
+    from, to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Small screen adjustments */
+@media (max-width: 768px) {
+  .datetime-info {
+    padding: 10px 6px 6px 6px;
+  }
+  
+  .datetime-text {
+    font-size: 10px;
+  }
+  
+  .timezone-text {
+    font-size: 8px;
+  }
+}
+

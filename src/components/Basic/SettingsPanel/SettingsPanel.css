@@ -1,0 +1,466 @@
+.settings-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: clamp(510px, 32vw, min(560px, calc(100vw - 30px)));
+  height: clamp(650px, 70vh, min(700px, calc(100vh - 30px)));
+  margin: 0; /* Was 15px, then 0px */
+  background-color: rgba(46, 52, 64, 0.85);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ececec; /* Default text color, reverted from var */
+  z-index: 1020; /* Increased from 1001 to be above BackgroundFilter (1010) */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, 
+              transform 0.4s ease, 
+              visibility 0s linear 0.4s;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-panel.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0s;
+}
+
+.settings-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: none;
+}
+
+.settings-panel-title {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 400; /* As per previous state */
+  /* Removed theme-related transitions and color vars */
+}
+
+.settings-panel-close-button {
+  background: transparent;
+  border: none;
+  color: #ececec; /* Default icon color, reverted from var */
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px; /* As per previous state */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out; /* Kept this specific transition */
+}
+
+.settings-panel-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2); /* As per previous state */
+}
+
+.settings-panel-close-button svg {
+  fill: currentColor;
+}
+
+.settings-panel-content {
+  padding: 0px 20px 85px 20px; /* Adjusted padding for docked logout row */
+  flex-grow: 1;
+  overflow-y: auto;
+  /* Removed theme-related transitions and color vars */
+}
+
+/* Styles for the theme toggle row - reverted to simpler state */
+.settings-row.theme-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: rgba(59, 66, 82, 0.3);
+    border-radius: 8px;
+    margin-top: 20px; 
+}
+
+.theme-info {
+    display: flex;
+    align-items: center;
+}
+
+.theme-text {
+    font-size: 0.9rem;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.theme-options {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-option {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(236, 236, 236, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.theme-option:hover {
+    background-color: rgba(236, 236, 236, 0.4);
+}
+
+.theme-option svg {
+    width: 15px;
+    height: 15px;
+    fill: #ececec;
+    transition: fill 0.3s ease;
+}
+
+.settings-row .theme-option.active svg {
+    fill: #168862;
+}
+
+.settings-row .theme-option:not(.active):hover svg {
+    fill: #2d2d2d;
+}
+
+/* Remove old toggle switch styles */
+.toggle-switch {
+    display: none;
+}
+
+/* Styles for the Tooltip toggle row */
+.settings-row.tooltip-toggle-row,
+.settings-row.fullscreen-toggle-row,
+.settings-row.sound-toggle-row,
+.settings-row.alias-row,
+.settings-row.password-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px; /* Consistent padding */
+    background-color: rgba(59, 66, 82, 0.3); /* Consistent background */
+    border-radius: 8px; /* Consistent border-radius */
+    margin-top: 15px; /* Spacing from the theme toggle row */
+    /* No theme-related transitions needed */
+}
+
+.settings-row.logout-row {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: rgba(59, 66, 82, 0.3);
+  border-radius: 8px;
+}
+
+.tooltip-info {
+    display: flex;
+    align-items: center;
+}
+
+.tooltip-text {
+    font-size: 0.9rem;
+}
+
+.tooltip-options {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tooltip-option {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(236, 236, 236, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.tooltip-option:hover {
+    background-color: rgba(236, 236, 236, 0.4);
+}
+
+.tooltip-option svg {
+    width: 15px;
+    height: 15px;
+    fill: #ececec;
+    transition: fill 0.3s ease;
+}
+
+.settings-row .tooltip-option.active svg {
+    fill: #168862;
+}
+
+.settings-row .tooltip-option:not(.active):hover svg {
+    fill: #2d2d2d;
+}
+
+/* Styles for the Fullscreen toggle row */
+.fullscreen-info {
+    display: flex;
+    align-items: center;
+    /* Text color will be inherited from .settings-panel */
+}
+
+.fullscreen-text {
+    font-size: 0.9rem; /* Consistent font size */
+    transition: opacity 0.2s ease-in-out;
+    /* No icon, so no margin needed for an icon */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fullscreen-countdown {
+    animation: fadeIn 0.2s ease;
+    display: inline-block; /* Ensures animation works on span */
+}
+
+/* Ensure toggle switch in fullscreen row behaves like the theme toggle */
+.fullscreen-toggle-row .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 21px;
+}
+
+.fullscreen-toggle-row .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.fullscreen-toggle-row .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4A5568; /* Default off state */
+    transition: .4s;
+}
+
+.fullscreen-toggle-row .slider:before {
+    position: absolute;
+    content: "";
+    height: 15px; 
+    width: 16px;  
+    left: 4px;    
+    bottom: 4px;  
+    background-color: #ececec; /* Knob color */
+    transition: .4s; /* Knob transition */
+}
+
+.fullscreen-toggle-row input:checked + .slider {
+    background-color: #339e90; /* Default on state */
+}
+
+.fullscreen-toggle-row input:focus + .slider {
+    box-shadow: 0 0 1px #42c4e1; /* Focus outline */
+}
+
+.fullscreen-toggle-row input:checked + .slider:before {
+    transform: translateX(16px); /* Knob movement */
+}
+
+.fullscreen-toggle-row .slider.round {
+    border-radius: 24px; 
+}
+
+.fullscreen-toggle-row .slider.round:before {
+    border-radius: 50%; 
+}
+
+.sound-info {
+    display: flex;
+    align-items: center;
+}
+
+.sound-text {
+    font-size: 0.9rem;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.sound-toggle-row .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 21px;
+}
+
+.sound-toggle-row .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sound-toggle-row .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #4A5568;
+    transition: .4s;
+}
+
+.sound-toggle-row .slider:before {
+    position: absolute;
+    content: "";
+    height: 15px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #ececec;
+    transition: .4s;
+}
+
+.sound-toggle-row input:checked + .slider {
+    background-color: #339e90;
+}
+
+.sound-toggle-row input:focus + .slider {
+    box-shadow: 0 0 1px #42c4e1;
+}
+
+.sound-toggle-row input:checked + .slider:before {
+    transform: translateX(16px);
+}
+
+.sound-toggle-row .slider.round {
+    border-radius: 24px;
+}
+
+.sound-toggle-row .slider.round:before {
+    border-radius: 50%;
+}
+
+.settings-row .toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  margin-left: auto;
+}
+
+/* Alias Input Row */
+.alias-text {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+  font-size: 0.9rem;
+}
+
+.alias-input-container {
+  display: flex;
+  align-items: center;
+}
+
+.alias-input {
+  background-color: #2c2c2c;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  width: 110px; /* Adjust width as needed */
+  text-align: left;
+}
+
+.alias-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.alias-input::placeholder {
+  color: #888;
+}
+
+.char-counter {
+  font-size: 9px;
+  color: #888;
+  margin-right: 8px; /* Changed from margin-left */
+}
+
+/* Password Row */
+.password-text {
+  font-size: 0.9rem;
+}
+
+.password-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4a5568;
+  color: #ececec;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.password-button:hover {
+  background-color: #5a6578;
+}
+
+.password-button svg {
+  width: 25px;
+  height: 14px;
+  fill: currentColor;
+}
+
+
+/* Logout Row */
+.logout-text {
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #4a5568;
+  color: #ececec;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.logout-button:hover {
+  background-color: #5a6578;
+}
+
+.logout-button svg {
+  width: 25px;
+  height: 14px;
+  fill: currentColor;
+}
+
+
+
+
+
+

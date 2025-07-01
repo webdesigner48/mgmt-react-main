@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="496.158" height="496.158" version="1.1" id="Layer_1"
+     viewBox="0 0 496.158 496.158" xml:space="preserve">
+    <style>
+        #droplet-group, .bubble {
+            transition: transform 0.5s ease-in-out;
+        }
+    </style>
+    <defs>
+        <!-- Drop shadow filter -->
+        <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="10" dy="10" stdDeviation="15" flood-color="#000000" flood-opacity="0.5" />
+        </filter>
+
+        <!-- Define a linear gradient for the droplet fill, from top-right to bottom-left -->
+        <linearGradient id="dropletFillGradient" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#3A7BC8" /> <!-- Top-right color -->
+            <stop offset="100%" stop-color="#C8E7FF" /> <!-- Bottom-left, much lighter color -->
+        </linearGradient>
+
+        <!-- Define a linear gradient for the droplet stroke, from top-right to bottom-left -->
+        <linearGradient id="dropletStrokeGradient" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#003d7a" /> <!-- Darker blue for top-right stroke -->
+            <stop offset="100%" stop-color="#006fe6" /> <!-- Slightly lighter blue for bottom-left stroke -->
+        </linearGradient>
+    </defs>
+
+    <!-- Main container group for droplet and bubbles, to apply the common animation -->
+    <g id="main-animation-container" transform="translate(0, 60)" filter="url(#shadow)">
+        <!-- Group for the droplet only -->
+        <g id="droplet-group">
+            <!-- The main droplet path with the gradient fill and gradient outline -->
+            <path id="main-droplet"
+                  style="fill:url(#dropletFillGradient); stroke:url(#dropletStrokeGradient); stroke-width:3;"
+                  d="M248.079,73.593c0,0-70.669,94.074-70.669,133.103s31.64,70.669,70.669,70.669 c39.028,0,70.669-31.64,70.669-70.669S248.079,73.593,248.079,73.593z"/>
+        </g>
+
+        <!-- Bubbles around the droplet, now positioned further out, in a blue shade, and less transparent -->
+        <circle class="bubble" cx="150" cy="150" r="14" fill="#A0D0FF" fill-opacity="0.7" />
+        <circle class="bubble" cx="340" cy="90" r="11" fill="#A0D0FF" fill-opacity="0.6" />
+        <circle class="bubble" cx="350" cy="260" r="16" fill="#A0D0FF" fill-opacity="0.5" />
+    </g>
+</svg>

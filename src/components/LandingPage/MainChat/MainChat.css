@@ -1,0 +1,148 @@
+.main-chat-container {
+  display: flex;
+  align-items: flex-start; 
+  justify-content: center; 
+  min-height: 100vh;
+  padding: 20px;
+  padding-left: 74px; /* Account for Sidebar */
+  padding-right: 74px; /* Account for Toolbar */
+  box-sizing: border-box;
+  position: relative; 
+  opacity: 1; /* Default state */
+  /* Removed transition: opacity 0.3s ease-in-out; to use animation */
+}
+
+/* Class for initial fade-in */
+.main-chat-container.fade-in {
+  animation: fadeInMainChat 0.4s ease forwards;
+}
+
+/* Class for fade-out */
+.main-chat-container.fade-out {
+  animation: fadeOutMainChat 0.4s ease forwards;
+  pointer-events: none; /* Prevent interaction during/after fade-out */
+}
+
+@keyframes fadeInMainChat {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOutMainChat {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.main-chat-container.hidden {
+  opacity: 0; /* Ensure it's hidden if this class is still used */
+  pointer-events: none; /* Prevent interaction when hidden */
+}
+
+.main-display-text {
+  font-size: 1.7em;
+  font-weight: 500;
+  color: #ecececc5;
+  text-align: center;
+  max-width: 600px;
+  width: 100%; /* Restored from fit-content */
+  box-sizing: border-box;
+  padding-top: 30vh; /* Adjusted from 25vh to move text lower */
+  opacity: 1; 
+}
+
+.main-input-area {
+  position: absolute;
+  bottom: 210px; /* Adjusted from 190px to move input area 20px higher */
+  left: 20px; 
+  right: 20px; 
+  width: auto; 
+  max-width: 660px; 
+  margin-left: auto;
+  margin-right: auto;
+  display: flex; 
+}
+
+.main-input-area textarea {
+  width: 100%;
+  min-height: 110px; 
+  max-height: 300px; 
+  padding: 10px 55px 39px 15px; /* Adjusted padding for icon: T:10, R:60, B:55, L:15 */
+  border: 1px solid rgba(236, 236, 236, 0.3);;
+  border-radius: 18px;
+  background-color: #16181d;
+  color: #ecececd8;
+  font-size: 1.07em;
+  resize: none;
+  overflow-y: auto; 
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.6; /* Increased from 1.5 for slightly more spacing */
+  transition: height 0.2s ease-out; /* Reverted to only animate height */
+  scrollbar-width: none; /* For Firefox - hide scrollbar */
+  -ms-overflow-style: none;  /* For Internet Explorer and Edge - hide scrollbar */
+}
+
+.main-input-area textarea::-webkit-scrollbar {
+  display: none; 
+}
+
+/* Styles for the send button container */
+.send-button {
+  position: absolute;
+  bottom: 16px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: #3b4252a6; /* Default background */
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease; /* Transition for button background */
+}
+
+.send-button:hover {
+  background: #525b70c0; /* Hover background for the button */
+}
+
+/* Styles for the SVG icon within the button */
+.send-button .send-icon {
+  width: 20px;
+  height: 20px;
+  fill: #ecececa5; /* Default icon fill color */
+  transition: fill 0.2s ease-in-out; /* Transition for icon fill */
+}
+
+/* Smoother caret blink animation (fade in/out) */
+@keyframes caret-smooth-blink-animation {
+  0%, 100% {
+    caret-color: transparent;
+  }
+  50% {
+    caret-color: #66a3ff; /* Caret color when fully visible */
+  }
+}
+
+.main-input-area textarea:focus {
+  outline: none; 
+  animation: caret-smooth-blink-animation 1s infinite ease-in-out;
+
+  caret-color: #66a3ff; /* This should match the opaque color in the animation */
+}
+
+.main-input-area textarea::placeholder {
+  color: #ececec82;
+}
+
+.main-input-area textarea.fade-top-text {
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 20px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 20px);
+}

@@ -1,0 +1,29 @@
+.background-filter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: hsla(230, 46%, 5%, 0.8); /* #2d2d2d with 70% opacity */
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(5px); /* For Safari */
+  z-index: 1010; /* Below sidebar (1000) but above other content */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0s linear 0.4s, background-color 0.4s ease;
+}
+
+.background-filter.visible {
+  opacity: 1;
+  visibility: visible;
+  /* Ensure animations start immediately when becoming visible */
+  transition: opacity 0.4s ease, visibility 0s linear 0s, background-color 0.4s ease;
+}
+
+.background-filter.active {
+  z-index: 1070; /* Adjusted to be below the menu */
+  background-color: hsla(230, 46%, 5%, 0.98);
+}

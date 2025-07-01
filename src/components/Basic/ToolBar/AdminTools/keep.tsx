@@ -1,0 +1,1836 @@
+import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import './CompanyDataPopup.css';
+import Leitung from "./../../../../assets/icons/ProcessIcons/Leitung.svg";
+interface CompanyDataPopupProps {
+  isVisible: boolean;
+  onClose: () => void;
+  onAddCompanyData: (companyData: Omit<CompanyDataRow, 'id' | 'aktion'>) => void;
+}
+
+// Define CompanyDataRow structure locally or import if available globally
+// For now, defining essential fields for the form
+interface CompanyDataFormData {
+  companyName: string;
+  street: string;
+  houseNumber: string;
+  postalCode: string;
+  province: string;
+  region?: string; // Neue Provinz
+  country: string; // New field for Land
+  taxid?: string; // New field for Umsatzsteuer-ID
+  industry: string; // New field for Branche
+  businessField: string; // New field for Geschäftsfeld
+  earliestStartTime?: string; // Früheste Anfangszeit
+  latestEndTime?: string; // Späteste Endzeit
+  dailyWorkingTime: string; // New field
+  dailyBreakTime: string; // New field
+}
+
+// Match this with TableCompanyData.tsx or a shared types file
+interface CompanyDataRow extends Omit<CompanyDataFormData, 'dailyWorkingTime' | 'dailyBreakTime' | 'country'> { // Exclude time fields and country if they are not part of the main data row, or adjust as needed
+  id: string;
+  // companyName, street, houseNumber, postalCode, province, industry, businessField are inherited
+  country: string; // Add country here if it should be part of the row data
+  dailyWorkingTimeHours?: number; // Store as number if needed for backend
+  dailyBreakTimeMinutes?: number; // Store as number if needed for backend
+  aktion: string;
+}
+
+type FormSection = 'company' | 'industry' | 'worktime' | 'design' | 'departments' | 'processes';
+
+const businessFieldsByIndustry: Record<string, string[]> = {
+  Maschinenbau: [
+    'Automotive',
+    'Medizin',
+    'Luft- und Raumfahrt',
+    'Landwirtschaft',
+    'Verpackungsindustrie',
+    'Textilindustrie',
+    'Energieerzeugung',
+  ],
+  Gesundheitswesen: [
+    'Krankenhäuser',
+    'Pharmazeutika',
+    'Medizintechnik',
+    'Pflegedienste',
+    'Biotechnologie',
+  ],
+  Finanzdienstleistungen: [
+    'Bankwesen',
+    'Versicherungen',
+    'Vermögensverwaltung',
+    'Fintech',
+    'Investmentbanking',
+  ],
+  Konsumgüter: [
+    'Lebensmittel & Getränke',
+    'Haushaltswaren',
+    'Bekleidung & Schuhe',
+    'Elektronik',
+    'Kosmetik & Körperpflege',
+  ],
+  Industrie: [
+    'Chemie',
+    'Bauwesen',
+    'Metallverarbeitung',
+    'Elektrotechnik',
+    'Anlagenbau',
+  ],
+  Energie: [
+    'Erneuerbare Energien',
+    'Fossile Brennstoffe',
+    'Netzbetrieb',
+    'Energiehandel',
+    'Energiespeicherung',
+  ],
+  Rohstoffe: [
+    'Bergbau',
+    'Öl und Gas',
+    'Forstwirtschaft',
+    'Agrarrohstoffe',
+    'Metalle',
+  ],
+  Immobilien: [
+    'Wohnimmobilien',
+    'Gewerbeimmobilien',
+    'Projektentwicklung',
+    'Immobilienverwaltung',
+    'Maklerwesen',
+  ],
+  Unterhaltung: [
+    'Film & Fernsehen',
+    'Musik',
+    'Videospiele',
+    'Veranstaltungen',
+    'Streamingdienste',
+  ],
+  Bildung: [
+    'Schulen & Universitäten',
+    'Berufliche Weiterbildung',
+    'E-Learning',
+    'Frühkindliche Bildung',
+    'Nachhilfe',
+  ],
+  Tourismus: [
+    'Reiseveranstalter',
+    'Hotellerie',
+    'Fluggesellschaften',
+    'Kreuzfahrten',
+    'Attraktionen',
+  ],
+  Gastronomie: [
+    'Restaurants',
+    'Cafés & Bars',
+    'Catering',
+    'Systemgastronomie',
+    'Food Trucks',
+  ],
+};
+
+const CompanyDataPopup: React.FC<CompanyDataPopupProps> = ({ isVisible, onClose, onAddCompanyData }) => {
+  const [isMounted, setIsMounted] = useState(isVisible);
+  const [animationClassName, setAnimationClassName] = useState('');
+  const [activeSection, setActiveSection] = useState<FormSection>('company');
+  const [formData, setFormData] = useState<CompanyDataFormData>({
+    companyName: '',
+    street: '',
+    houseNumber: '',
+    postalCode: '',
+    province: '',
+    region: '',
+    country: '', // Initialize new field
+    industry: '',
+    businessField: '',
+    earliestStartTime: '',
+    latestEndTime: '',
+    dailyWorkingTime: '',
+    dailyBreakTime: '',
+  });
+  const [totalWorkTimeDisplay, setTotalWorkTimeDisplay] = useState('0.0 Stunden');
+  const [weeklyWorkTime, setWeeklyWorkTime] = useState('0.0');
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [logoActive, setLogoActive] = useState(false);
+  const [vacationWeeks, setVacationWeeks] = useState('');
+  const [specialDays, setSpecialDays] = useState('');
+  const [yearlyWorkHours, setYearlyWorkHours] = useState('-');
+  // State für Homeoffice-Tage
+  const [maxHomeofficeDays, setMaxHomeofficeDays] = useState('');
+  // State für Kernarbeitszeit-Inputs
+  const [coreStartTime, setCoreStartTime] = useState('');
+  const [coreEndTime, setCoreEndTime] = useState('');
+
+  // Farbcode-States für Designbereich
+  const [colorBlue, setColorBlue] = useState('');
+  const [colorLightBlue, setColorLightBlue] = useState('');
+  const [colorGreen, setColorGreen] = useState('');
+  const [colorLightGreen, setColorLightGreen] = useState('');
+  const [colorYellow, setColorYellow] = useState('');
+  const [colorLightYellow, setColorLightYellow] = useState('');
+  const [colorRed, setColorRed] = useState('');
+  const [colorLightRed, setColorLightRed] = useState('');
+  const [colorOrange, setColorOrange] = useState('');
+  const [colorLightOrange, setColorLightOrange] = useState('');
+
+  // Neue States für Schriftarten und Farben
+  const [fontWhite, setFontWhite] = useState('');
+  const [fontBlack, setFontBlack] = useState('');
+  const [fontHeadline, setFontHeadline] = useState('');
+  const [fontText, setFontText] = useState('');
+
+  // Neuer State für das zusätzliche Eingabefeld in der Abteilung
+  const [departmentGreenInput, setDepartmentGreenInput] = useState('');
+  const [departmentOrangeSelect, setDepartmentOrangeSelect] = useState('');
+  const [departmentRedInput, setDepartmentRedInput] = useState('');
+
+  // Animation für Departments-Bereich
+  const [departmentsFadeIn, setDepartmentsFadeIn] = useState(false);
+  useEffect(() => {
+    if (activeSection === 'departments') {
+      setDepartmentsFadeIn(false);
+      const timer = setTimeout(() => setDepartmentsFadeIn(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      setDepartmentsFadeIn(false);
+    }
+  }, [activeSection]);
+
+  // Animation für Prozesse-Bereich
+  const [processesFadeIn, setProcessesFadeIn] = useState(false);
+  useEffect(() => {
+    if (activeSection === 'processes') {
+      setProcessesFadeIn(false);
+      const timer = setTimeout(() => setProcessesFadeIn(true), 10);
+      return () => clearTimeout(timer);
+    } else {
+      setProcessesFadeIn(false);
+    }
+  }, [activeSection]);
+
+  useEffect(() => {
+    if (isVisible) {
+      setIsMounted(true);
+      const timer = setTimeout(() => {
+        setAnimationClassName('fade-in');
+      }, 10);
+      return () => clearTimeout(timer);
+    } else {
+      setAnimationClassName('fade-out');
+      const timer = setTimeout(() => {
+        setIsMounted(false);
+        // Reset form when popup is fully closed
+        setFormData({
+          companyName: '',
+          street: '',
+          houseNumber: '',
+          postalCode: '',
+          province: '',
+          region: '',
+          country: '', // Reset new field
+          industry: '',
+          businessField: '',
+          earliestStartTime: '',
+          latestEndTime: '',
+          dailyWorkingTime: '',
+          dailyBreakTime: '',
+        });
+        setTotalWorkTimeDisplay('0.0 Stunden');
+        setActiveSection('company');
+      }, 300); // Match CSS transition duration
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible]);
+
+  // Summenanzeige: Zeige nur Summen, wenn beide Felder ausgefüllt sind, sonst "-"
+  useEffect(() => {
+    const hasWork = formData.dailyWorkingTime.trim() !== '';
+    const hasBreak = formData.dailyBreakTime.trim() !== '';
+    if (hasWork && hasBreak) {
+      const workHours = parseFloat(formData.dailyWorkingTime) || 0;
+      const breakMinutes = parseFloat(formData.dailyBreakTime) || 0;
+      const breakHours = breakMinutes / 60;
+      const totalHours = workHours + breakHours;
+      setTotalWorkTimeDisplay(`${totalHours.toFixed(1)} Stunden täglich`);
+      setWeeklyWorkTime(`${(totalHours * 5).toFixed(1)}`);
+    } else {
+      setTotalWorkTimeDisplay('-');
+      setWeeklyWorkTime('-');
+    }
+  }, [formData.dailyWorkingTime, formData.dailyBreakTime]);
+
+  // Berechne Jahresarbeitszeit (Wochenstunden * (52 - Urlaub) - Sonderfreie Tage * Tagesstunden)
+  useEffect(() => {
+    const hasWork = formData.dailyWorkingTime.trim() !== '' && formData.dailyBreakTime.trim() !== '';
+    const hasVacation = vacationWeeks.trim() !== '';
+    if (hasWork && hasVacation) {
+      const workHours = parseFloat(formData.dailyWorkingTime) || 0;
+      const breakMinutes = parseFloat(formData.dailyBreakTime) || 0;
+      const breakHours = breakMinutes / 60;
+      const totalHours = workHours + breakHours;
+      const weekHours = totalHours * 5;
+      const vacation = parseFloat(vacationWeeks) || 0;
+      const special = parseFloat(specialDays) || 0;
+      // Sonderfreie Tage multipliziert mit Tagesstunden abziehen
+      const yearly = (weekHours * (52 - vacation)) - (special * totalHours);
+      setYearlyWorkHours(yearly > 0 ? Math.round(yearly).toString() : '0');
+    } else {
+      setYearlyWorkHours('-');
+    }
+  }, [formData.dailyWorkingTime, formData.dailyBreakTime, vacationWeeks, specialDays]);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    if (
+      name === 'dailyWorkingTime' ||
+      name === 'dailyBreakTime'
+    ) {
+      // Allow only numbers and a single decimal point for time inputs
+      if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    } else if (name === 'earliestStartTime' || name === 'latestEndTime') {
+      // Erlaube Zwischenstände für Uhrzeit-Eingabe (z.B. '0', '08', '08:', '08:0', '08:00')
+      if (value === '' || /^([0-2]?[0-9])?(:[0-5]?[0-9]?)?$/.test(value)) {
+        setFormData(prev => ({ ...prev, [name]: value }));
+      }
+    } else {
+      // For other inputs, just update the state
+      setFormData(prev => {
+        const newState = { ...prev, [name]: value };
+        // Reset businessField if industry changes
+        if (name === 'industry' && prev.industry !== value) {
+          newState.businessField = '';
+        }
+        return newState;
+      });
+    }
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!formData.companyName.trim() || !formData.street.trim() || !formData.houseNumber.trim() || !formData.postalCode.trim() || !formData.province.trim() || !formData.country.trim() || !formData.industry.trim() || !formData.businessField.trim() || !formData.dailyWorkingTime.trim() || !formData.dailyBreakTime.trim()) {
+      alert('Bitte füllen Sie alle erforderlichen Felder aus, einschließlich Arbeits- und Pausenzeiten.');
+      return;
+    }
+    const workHours = parseFloat(formData.dailyWorkingTime);
+    const breakMinutes = parseFloat(formData.dailyBreakTime);
+
+    if (isNaN(workHours) || workHours < 0 || isNaN(breakMinutes) || breakMinutes < 0) {
+        alert('Bitte geben Sie gültige Zahlen für Arbeits- und Pausenzeiten ein.');
+        return;
+    }
+
+    // Pass only the necessary fields, converting times if needed
+    const dataToSubmit: Omit<CompanyDataRow, 'id' | 'aktion'> = {
+        companyName: formData.companyName,
+        street: formData.street,
+        houseNumber: formData.houseNumber,
+        postalCode: formData.postalCode,
+        province: formData.province,
+        country: formData.country, // Add country to submitted data
+        industry: formData.industry,
+        businessField: formData.businessField,
+        // Optionally convert and pass dailyWorkingTimeHours and dailyBreakTimeMinutes
+        // dailyWorkingTimeHours: parseFloat(formData.dailyWorkingTime) || 0,
+        // dailyBreakTimeMinutes: parseFloat(formData.dailyBreakTime) || 0,
+    };
+
+    onAddCompanyData(dataToSubmit);
+    onClose();
+  };
+
+  const handleLogoDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleLogoFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleLogoFile = (file: File) => {
+    if (file.type !== 'image/svg+xml') {
+      // Browser-Popup für 3 Sekunden mit sanfter Ausblendung
+      const msg = document.createElement('div');
+      msg.textContent = 'Nur SVG-Dateien erlaubt!';
+      msg.className = 'svg-popup-message';
+      document.body.appendChild(msg);
+      setTimeout(() => {
+        msg.classList.add('hide');
+        setTimeout(() => msg.remove(), 400);
+      }, 2000);
+      setLogoPreview(null);
+      setLogoActive(false);
+      return;
+    }
+    setLogoActive(true);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setLogoPreview(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleLogoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleLogoFile(e.target.files[0]);
+    }
+  };
+
+  const handleLogoClick = () => {
+    document.getElementById('logo-upload-input')?.click();
+  };
+
+  const renderCompanySection = () => (
+    <div className="popup-form-section">
+      <div className="form-group">
+        <input
+          type="text"
+          id="companyName"
+          name="companyName"
+          value={formData.companyName}
+          onChange={handleChange}
+          className={formData.companyName ? 'filled' : ''}
+          placeholder="Firmenname"
+        />
+      </div>
+      <div className="form-row">
+        <div className="form-group form-group-street">
+          <input
+            type="text"
+            id="street"
+            name="street"
+            value={formData.street}
+            onChange={handleChange}
+            className={formData.street ? 'filled' : ''}
+            placeholder="Strasse"
+          />
+        </div>
+        <div className="form-group form-group-houseNumber">
+          <input
+            type="text"
+            id="houseNumber"
+            name="houseNumber"
+            value={formData.houseNumber}
+            onChange={handleChange}
+            className={formData.houseNumber ? 'filled' : ''}
+            placeholder="Nr."
+          />
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group form-group-postalCode">
+          <input
+            type="text"
+            id="postalCode"
+            name="postalCode"
+            value={formData.postalCode}
+            onChange={handleChange}
+            className={formData.postalCode ? 'filled' : ''}
+            placeholder="Postleitzahl"
+          />
+        </div>
+        <div className="form-group form-group-province">
+          <input
+            type="text"
+            id="province"
+            name="province"
+            value={formData.province}
+            onChange={handleChange}
+            className={formData.province ? 'filled' : ''}
+            placeholder="Stadt"
+          />
+        </div>
+      </div>
+      <div className="form-group form-group-province">
+        <input
+          type="text"
+          id="region"
+          name="region"
+          value={formData.region || ''}
+          onChange={handleChange}
+          className={formData.region ? 'filled' : ''}
+          placeholder="Provinz"
+        />
+      </div>
+      <div className="form-group">
+        <input
+          type="text"
+          id="country"
+          name="country"
+          value={formData.country}
+          onChange={handleChange}
+          className={formData.country ? 'filled' : ''}
+          placeholder="Land"
+        />
+      </div>
+      <div className="form-group">
+        <input
+          type="text"
+          id="taxid"
+          name="taxid"
+          value={formData.taxid}
+          onChange={handleChange}
+          className={formData.taxid ? 'filled' : ''}
+          placeholder="Umsatzsteuer - ID"
+        />
+      </div>
+      <div className="form-group">
+        <select
+          id="industry"
+          name="industry"
+          value={formData.industry}
+          onChange={handleChange}
+          className={
+            formData.industry ? 'filled' : 'dropdown-placeholder-orange'
+          }
+        >
+          <option value="" style={{ color: 'orange', opacity: 0.7 }}>Branche auswählen</option>
+          <option value="Maschinenbau">Maschinenbau</option>
+          <option value="Gesundheitswesen">Gesundheitswesen</option>
+          <option value="Finanzdienstleistungen">Finanzdienstleistungen</option>
+          <option value="Konsumgüter">Konsumgüter</option>
+          <option value="Industrie">Industrie</option>
+          <option value="Energie">Energie</option>
+          <option value="Rohstoffe">Rohstoffe</option>
+          <option value="Immobilien">Immobilien</option>
+          <option value="Unterhaltung">Unterhaltung</option>
+          <option value="Bildung">Bildung</option>
+          <option value="Tourismus">Tourismus</option>
+          <option value="Gastronomie">Gastronomie</option>
+        </select>
+      </div>
+      <div className="form-group">
+        <select
+          id="businessField"
+          name="businessField"
+          value={formData.businessField}
+          onChange={handleChange}
+          disabled={!formData.industry}
+          className={
+            !formData.industry
+              ? 'dropdown-placeholder-grey'
+              : formData.businessField
+              ? 'filled'
+              : 'dropdown-placeholder-orange'
+          }
+        >
+          <option value="" style={{ color: !formData.industry ? '#b0b0b0' : 'orange', opacity: !formData.industry ? 0.45 : 0.7 }}>
+            Geschäftsfeld auswählen
+          </option>
+          {formData.industry &&
+            businessFieldsByIndustry[formData.industry]?.map((field) => (
+              <option key={field} value={field}>
+                {field}
+              </option>
+            ))}
+        </select>
+      </div>
+      {/* Arbeitszeitfelder integriert entfernen */}
+      {/* Die Arbeitszeit-Inputs und Summen werden nur noch in der Arbeitszeit-Sektion angezeigt */}
+    </div>
+  );
+
+  const renderDesignSection = () => (
+    <div className="popup-form-section design-section">
+      <div className="design-logo-row">
+        <div
+          className={`design-logo-dropzone${logoActive ? ' active' : ''}`}
+          onClick={logoActive ? () => {
+            setLogoPreview(null);
+            setLogoActive(false);
+          } : handleLogoClick}
+          onDrop={handleLogoDrop}
+          onDragOver={e => e.preventDefault()}
+          tabIndex={0}
+          style={{ outline: 'none' }}
+        >
+          <input
+            id="logo-upload-input"
+            type="file"
+            accept="image/svg+xml"
+            style={{ display: 'none' }}
+            onChange={handleLogoInput}
+          />
+          {logoPreview ? (
+            <img src={logoPreview} alt="Logo Preview" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          ) : (
+            <div className="design-logo-placeholder">
+              {/* Image icon */}
+              <svg width="40" height="40" fill="#aeb8c2" viewBox="0 0 24 24">
+                <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zm-2 0H5V5h14zm-7-3l2.03 2.71a1 1 0 0 0 1.58 0L19 14l-3.5-4.5-2.5 3.01L9.5 11l-4.5 6h14z" />
+              </svg>
+            </div>
+          )}
+          {/* Hover-Upload-Icon */}
+          {!logoActive && (
+            <span className="design-logo-hovericon">
+              <svg width="45" height="35" fill="#2d2d2d" viewBox="0 0 24 24">
+                <path d="M12 16V4m0 0l-5 5m5-5l5 5" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                <rect x="6" y="18" width="12" height="2" rx="1" fill="#2d2d2d" />
+              </svg>
+            </span>
+          )}
+          {/* Delete-Icon */}
+          {logoActive && (
+            <span className="design-logo-deleteicon">
+              <svg width="37" height="37" fill="#2d2d2d" viewBox="0 0 24 24">
+                <path d="M3 6h18" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round"/>
+                <rect x="5" y="6" width="14" height="14" rx="2" fill="none" stroke="#2d2d2d" strokeWidth="2"/>
+                <path d="M10 11v4" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M14 11v4" stroke="#2d2d2d" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </span>
+          )}
+        </div>
+        <div className="design-logo-text" style={{ fontSize: '50px', display: 'flex', alignItems: 'center', minHeight: 150, textAlign: 'right' }}>
+          {logoActive ? 'Logo vorhanden' : 'Logo einfügen'}
+        </div>
+      </div>
+      <div className="section-label">Design der Schrift</div>
+      <hr className="divider-row" />
+      <div className="design-font-row">
+        <div className="design-font-inputs">
+          <input
+            type="text"
+            className="design-font-input"
+            placeholder="Hintergrundfarbe"
+            value={fontWhite}
+            onChange={e => setFontWhite(e.target.value)}
+          />
+          <input
+            type="text"
+            className="design-font-input"
+            placeholder="Textfarbe"
+            value={fontBlack}
+            onChange={e => setFontBlack(e.target.value)}
+          />
+          <select
+            className="design-font-dropdown"
+            value={fontHeadline}
+            onChange={e => setFontHeadline(e.target.value)}
+          >
+            <option value="" disabled>Schriftart Überschriften</option>
+            <option value="Calibri">Calibri</option>
+            <option value="Calibri Light">Calibri Light</option>
+            <option value="Arial">Arial</option>
+            <option value="Arial Narrow">Arial Narrow</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Segoe UI">Segoe UI</option>
+          </select>
+          <select
+            className="design-font-dropdown"
+            value={fontText}
+            onChange={e => setFontText(e.target.value)}
+          >
+            <option value="" disabled>Schriftart Text</option>
+            <option value="Calibri">Calibri</option>
+            <option value="Calibri Light">Calibri Light</option>
+            <option value="Arial">Arial</option>
+            <option value="Arial Narrow">Arial Narrow</option>
+            <option value="Verdana">Verdana</option>
+            <option value="Tahoma">Tahoma</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Trebuchet MS">Trebuchet MS</option>
+            <option value="Segoe UI">Segoe UI</option>
+          </select>
+        </div>
+        <div
+          className="design-font-preview"
+          style={{
+            width: '50%',
+            minHeight: '120px',
+            background: fontWhite || '#fff',
+            color: fontBlack || '#222',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            padding: '10px 14px',
+            borderRadius: '7px',
+            boxSizing: 'border-box',
+            marginLeft: '14px',
+          }}
+        >
+          <div
+            style={{
+              fontFamily: fontHeadline || 'Calibri',
+              fontSize: '1.35em',
+              fontWeight: 600,
+              marginBottom: '18px',
+              width: '100%',
+              textAlign: 'left',
+            }}
+          >
+            Dies ist eine Überschrift
+          </div>
+          <div
+            style={{
+              fontFamily: fontText || 'Calibri',
+              fontSize: '1.08em',
+              fontWeight: 400,
+              marginTop: '2px',
+            }}
+          >
+            Mit diesem Text testen wir das Design der Schrift unseres Unternehmens. So geben wir etwas von unserer Identität ins System und können davon profitieren.
+          </div>
+        </div>
+      </div>
+      <div className="section-label">Farbpalette</div>
+      <hr className="divider-row" />
+      <div className="design-color-row">
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorBlue) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Blau"
+            value={colorBlue}
+            onChange={e => setColorBlue(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorBlue)}
+            style={isValidHexColor(colorBlue) ? { background: colorBlue, borderColor: colorBlue } : {}}
+          >
+            {getColorBoxContent(colorBlue, 'blue')}
+          </div>
+        </div>
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorLightBlue) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Hellblau"
+            value={colorLightBlue}
+            onChange={e => setColorLightBlue(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorLightBlue)}
+            style={isValidHexColor(colorLightBlue) ? { background: colorLightBlue, borderColor: colorLightBlue } : {}}
+          >
+            {getColorBoxContent(colorLightBlue, 'lightblue')}
+          </div>
+        </div>
+      </div>
+      <div className="design-color-row">
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorGreen) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Grün"
+            value={colorGreen}
+            onChange={e => setColorGreen(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorGreen)}
+            style={isValidHexColor(colorGreen) ? { background: colorGreen, borderColor: colorGreen } : {}}
+          >
+            {getColorBoxContent(colorGreen, 'green')}
+          </div>
+        </div>
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorLightGreen) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Hellgrün"
+            value={colorLightGreen}
+            onChange={e => setColorLightGreen(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorLightGreen)}
+            style={isValidHexColor(colorLightGreen) ? { background: colorLightGreen, borderColor: colorLightGreen } : {}}
+          >
+            {getColorBoxContent(colorLightGreen, 'lightgreen')}
+          </div>
+        </div>
+      </div>
+      <div className="design-color-row">
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorYellow) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Gelb"
+            value={colorYellow}
+            onChange={e => setColorYellow(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorYellow)}
+            style={isValidHexColor(colorYellow) ? { background: colorYellow, borderColor: colorYellow } : {}}
+          >
+            {getColorBoxContent(colorYellow, 'yellow')}
+          </div>
+        </div>
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorLightYellow) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Hellgelb"
+            value={colorLightYellow}
+            onChange={e => setColorLightYellow(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorLightYellow)}
+            style={isValidHexColor(colorLightYellow) ? { background: colorLightYellow, borderColor: colorLightYellow } : {}}
+          >
+            {getColorBoxContent(colorLightYellow, 'lightyellow')}
+          </div>
+        </div>
+      </div>
+      <div className="design-color-row">
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorOrange) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Orange"
+            value={colorOrange}
+            onChange={e => setColorOrange(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorOrange)}
+            style={isValidHexColor(colorOrange) ? { background: colorOrange, borderColor: colorOrange } : {}}
+          >
+            {getColorBoxContent(colorOrange, 'orange')}
+          </div>
+        </div>
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorLightOrange) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Hellorange"
+            value={colorLightOrange}
+            onChange={e => setColorLightOrange(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorLightOrange)}
+            style={isValidHexColor(colorLightOrange) ? { background: colorLightOrange, borderColor: colorLightOrange } : {}}
+          >
+            {getColorBoxContent(colorLightOrange, 'lightorange')}
+          </div>
+        </div>
+      </div>
+      <div className="design-color-row">
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorRed) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Rot"
+            value={colorRed}
+            onChange={e => setColorRed(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorRed)}
+            style={isValidHexColor(colorRed) ? { background: colorRed, borderColor: colorRed } : {}}
+          >
+            {getColorBoxContent(colorRed, 'red')}
+          </div>
+        </div>
+        <div className="design-color-half">
+          <input
+            type="text"
+            className={`design-color-input${isValidHexColor(colorLightRed) ? ' color-valid' : ''}`}
+            placeholder="Farbcode Hellrot"
+            value={colorLightRed}
+            onChange={e => setColorLightRed(e.target.value)}
+          />
+          <div
+            className={getColorBoxClass(colorLightRed)}
+            style={isValidHexColor(colorLightRed) ? { background: colorLightRed, borderColor: colorLightRed } : {}}
+          >
+            {getColorBoxContent(colorLightRed, 'lightred')}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const getSectionIcon = (section: FormSection) => {
+    switch (section) {
+      case 'company':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+          </svg>
+        );
+      case 'industry':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.77 5.82 22l1.18-7.86-5-4.87 6.91-1.01L12 2z"/>
+          </svg>
+        );
+      case 'worktime':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+            <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+          </svg>
+        );
+      case 'design':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M7 16c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm10.71-9.29l-3.42-3.42c-.39-.39-1.02-.39-1.41 0l-8.59 8.59c-.39.39-.39 1.02 0 1.41l3.42 3.42c.39.39 1.02.39 1.41 0l8.59-8.59c.39-.39.39-1.02 0-1.41zM5.12 17.88c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41 1.41 1.41-1.41 1.41z"/>
+          </svg>
+        );
+      case 'departments':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.08 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+        );
+      case 'processes':
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <g>
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.43-2.06l1.34-1.04a1 1 0 0 0 .23-1.32l-1.27-2.2a1 1 0 0 0-1.17-.47l-1.57.5a7.03 7.03 0 0 0-1.6-.93l-.24-1.65A1 1 0 0 0 14 4h-2a1 1 0 0 0-1 .88l-.24 1.65a7.03 7.03 0 0 0-1.6.93l-1.57-.5a1 1 0 0 0-1.17.47l-1.27 2.2a1 1 0 0 0 .23 1.32l1.34 1.04c-.05.32-.08.65-.08.99s.03.67.08.99l-1.34 1.04a1 1 0 0 0-.23 1.32l1.27 2.2a1 1 0 0 0 1.17.47l1.57-.5c.5.36 1.04.67 1.6.93l.24 1.65A1 1 0 0 0 12 20h2a1 1 0 0 0 1-.88l.24-1.65c.56-.26 1.1-.57 1.6-.93l1.57.5a1 1 0 0 0 1.17-.47l1.27-2.2a1 1 0 0 0-.23-1.32l-1.34-1.04c.05-.32.08-.65.08-.99s-.03-.67-.08-.99z"/>
+              <path d="M17.5 2.5a.75.75 0 0 1 1.06 0l2.44 2.44a.75.75 0 0 1-.53 1.28H19a8 8 0 1 1-7.99 8.5.75.75 0 1 1 1.5-.1A6.5 6.5 0 1 0 19 5.5h-1.47a.75.75 0 0 1-.53-1.28l2.44-2.44a.75.75 0 0 1 1.06 0z"/>
+            </g>
+          </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Hilfsfunktion: Differenz zwischen zwei Uhrzeiten (HH:MM) in Stunden berechnen
+  function getTimeFrameHours(start: string, end: string): string {
+    if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(start) || !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(end)) {
+      return '-';
+    }
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    let diff = (eh + em / 60) - (sh + sm / 60);
+    if (diff < 0) diff += 24; // Über Mitternacht
+    return diff.toFixed(1);
+  }
+
+  // Hilfsfunktion: Differenz zwischen zwei Uhrzeiten (HH:MM) in Stunden berechnen, erlaubt auch "-"
+  function getTimeFrameHoursAllowDash(start: string, end: string): string {
+    if (start === '-' && end === '-') return '0.0';
+    if (start === '-' || end === '-') return '-';
+    if (!/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(start) || !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(end)) {
+      return '-';
+    }
+    const [sh, sm] = start.split(':').map(Number);
+    const [eh, em] = end.split(':').map(Number);
+    let diff = (eh + em / 60) - (sh + sm / 60);
+    if (diff < 0) diff += 24;
+    return diff.toFixed(1);
+  }
+  const coreTimeFrameHours = getTimeFrameHoursAllowDash(coreStartTime, coreEndTime);
+
+  // Hilfsfunktion für Homeoffice-Stundensumme
+  function getHomeofficeYearlyHours(): string {
+    const homeofficeDays = parseFloat(maxHomeofficeDays.replace(',', '.'));
+    const vacation = parseFloat(vacationWeeks.replace(',', '.'));
+    const workHours = parseFloat(formData.dailyWorkingTime);
+    const breakMinutes = parseFloat(formData.dailyBreakTime);
+    // Logik wie vorher: Nur berechnen, wenn ALLE Felder ausgefüllt und gültig
+    if (
+      isNaN(homeofficeDays) || homeofficeDays <= 0 ||
+      isNaN(vacation) || vacationWeeks.trim() === '' || vacation < 0 ||
+      isNaN(workHours) || formData.dailyWorkingTime.trim() === '' || workHours < 0 ||
+      isNaN(breakMinutes) || formData.dailyBreakTime.trim() === '' || breakMinutes < 0
+    ) {
+      return '-';
+    }
+    const totalHours = workHours + breakMinutes / 60;
+    const weeks = 52 - vacation;
+    const sum = weeks * homeofficeDays * totalHours;
+    return sum > 0 ? sum.toFixed(1) : '-';
+  }
+  const homeofficeYearlyHours = getHomeofficeYearlyHours();
+  const timeFrameHours = getTimeFrameHours(formData.earliestStartTime || '', formData.latestEndTime || '');
+
+  function isValidHexColor(val: string) {
+    return /^#[0-9a-fA-F]{6}$/.test(val);
+  }
+
+  function getColorBoxContent(val: string, type: 'blue' | 'lightblue' | 'green' | 'lightgreen' | 'yellow' | 'lightyellow' | 'orange' | 'lightorange' | 'red' | 'lightred') {
+    let checkColor = '#ececec';
+    if (type === 'yellow' || type.startsWith('light') || type === 'orange' || type === 'lightorange') {
+      checkColor = '#404040';
+    }
+    const isValid = isValidHexColor(val);
+    const isIncomplete = /^#$|^#[0-9a-fA-F]{1,5}$/.test(val); // auch nur #
+    const isError = val && !isValid && !isIncomplete;
+
+    if (isError) {
+      // Fehlerfall: X anzeigen, roter Hintergrund
+      return (
+        <span className="colorbox-svg-wrapper">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 26 26"
+            fill="none"
+            style={{ display: 'block', margin: '0 auto', position: 'absolute', left: 0, top: 0, opacity: 1, transition: 'opacity 0.25s' }}
+          >
+            <line x1="7" y1="7" x2="19" y2="19" stroke="#6d1a1a" strokeWidth="2.2" strokeLinecap="round" />
+            <line x1="19" y1="7" x2="7" y2="19" stroke="#6d1a1a" strokeWidth="2.2" strokeLinecap="round" />
+          </svg>
+        </span>
+      );
+    }
+    if (isIncomplete) {
+      // Drei Punkte: animierter Übergang wie bei Strich/Haken/X
+      return (
+        <span className="colorbox-svg-wrapper">
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 26 26"
+            fill="none"
+            style={{ display: 'block', margin: '0 auto', position: 'absolute', left: 0, top: 0, opacity: isIncomplete ? 1 : 0, transition: 'opacity 0.25s' }}
+          >
+            <circle className="colorbox-dot" cx="8" cy="13" r="1.0" fill="#ececec" style={{ opacity: isIncomplete ? 1 : 0, transition: 'opacity 0.25s' }} />
+            <circle className="colorbox-dot" cx="13" cy="13" r="1.0" fill="#ececec" style={{ opacity: isIncomplete ? 1 : 0, transition: 'opacity 0.25s' }} />
+            <circle className="colorbox-dot" cx="18" cy="13" r="1.0" fill="#ececec" style={{ opacity: isIncomplete ? 1 : 0, transition: 'opacity 0.25s' }} />
+          </svg>
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 26 26"
+            fill="none"
+            style={{ display: 'block', margin: '0 auto', position: 'absolute', left: 0, top: 0, opacity: isIncomplete ? 0 : 1, transition: 'opacity 0.25s' }}
+          >
+            <line x1="5" y1="13" x2="21" y2="13" stroke="#ececec" strokeWidth="2.0" strokeLinecap="round" />
+          </svg>
+        </span>
+      );
+    }
+    return (
+      <span className="colorbox-svg-wrapper">
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 26 26"
+          fill="none"
+          style={{ display: 'block', margin: '0 auto', position: 'absolute', left: 0, top: 0, opacity: isValid ? 0 : 1, transition: 'opacity 0.25s' }}
+        >
+          <line x1="5" y1="13" x2="21" y2="13" stroke="#ececec" strokeWidth="2.0" strokeLinecap="round" />
+        </svg>
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 26 26"
+          fill="none"
+          style={{ display: 'block', margin: '0 auto', position: 'absolute', left: 0, top: 0, opacity: isValid ? 1 : 0, transition: 'opacity 0.25s' }}
+        >
+          <path d="M6 14l5 5 9-11" stroke={checkColor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </span>
+    );
+  }
+
+  function getColorBoxClass(val: string) {
+    if (!val) return 'design-color-box';
+    if (/^#$|^#[0-9a-fA-F]{1,5}$/.test(val)) return 'design-color-box color-incomplete';
+    if (!/^#[0-9a-fA-F]{6}$/.test(val)) return 'design-color-box color-error';
+    return 'design-color-box color-valid';
+  }
+
+  if (!isMounted && !animationClassName.includes('fade-out')) {
+    return null;
+  }
+  if (!isMounted && animationClassName === '' && !isVisible) {
+    return null;
+  }
+
+  // Namen-Arrays für spätere Bearbeitung
+  const managementNames = ["Leitung", "Finanzen", "Personal", "Kommunikation", "Konformität", "Datenschutz"];
+  const leistungNames = ["Vertrieb", "Vorbereitung", "Beschaffung", "Realisierung", "Prüfung", "Lieferung"];
+  const supportNames = ["Service", "Umwelt", "Arbeitsmittel", "Logistik", "Umgebung", "Sicherheit"];
+
+  return (
+    <div className={`company-data-popup-overlay ${animationClassName}`}>
+      <div className="company-data-popup-container-with-sidebar">
+        <div className="company-data-popup-content">
+          {/* Sidebar Navigation */}
+          <div className="popup-sidebar-nav">
+            <ul className="popup-sidebar-nav__list">
+              <li 
+                className={activeSection === 'company' ? 'active' : ''} 
+                onClick={() => setActiveSection('company')}
+              >
+                {getSectionIcon('company')}
+                <span>Informationen</span>
+              </li>
+              {/* Neues Listenelement für Design */}
+              <li
+                className={activeSection === 'design' ? 'active' : ''}
+                onClick={() => setActiveSection('design')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M7 16c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm10.71-9.29l-3.42-3.42c-.39-.39-1.02-.39-1.41 0l-8.59 8.59c-.39.39-.39 1.02 0 1.41l3.42 3.42c.39.39 1.02.39 1.41 0l8.59-8.59c.39-.39.39-1.02 0-1.41zM5.12 17.88c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l1.41-1.41 1.41 1.41-1.41 1.41z"/>
+                </svg>
+                <span>Design</span>
+              </li>
+              {/* Arbeitszeit jetzt zwischen Design und Abteilungen */}
+              <li
+                className={activeSection === 'worktime' ? 'active' : ''}
+                onClick={() => setActiveSection('worktime')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                  <path d="M12.5 7H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                </svg>
+                <span>Arbeitszeit</span>
+              </li>
+              <li
+                className={activeSection === 'departments' ? 'active' : ''}
+                onClick={() => setActiveSection('departments')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 2.08 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                <span>Abteilungen</span>
+              </li>
+              <li
+                className={activeSection === 'processes' ? 'active' : ''}
+                onClick={() => setActiveSection('processes')}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                  <g>
+                    <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7zm7.43-2.06l1.34-1.04a1 1 0 0 0 .23-1.32l-1.27-2.2a1 1 0 0 0-1.17-.47l-1.57.5a7.03 7.03 0 0 0-1.6-.93l-.24-1.65A1 1 0 0 0 14 4h-2a1 1 0 0 0-1 .88l-.24 1.65a7.03 7.03 0 0 0-1.6.93l-1.57-.5a1 1 0 0 0-1.17.47l-1.27 2.2a1 1 0 0 0 .23 1.32l1.34 1.04c-.05.32-.08.65-.08.99s.03.67.08.99l-1.34 1.04a1 1 0 0 0-.23 1.32l1.27 2.2a1 1 0 0 0 1.17.47l1.57-.5c.5.36 1.04.67 1.6.93l.24 1.65A1 1 0 0 0 12 20h2a1 1 0 0 0 1-.88l.24-1.65c.56-.26 1.1-.57 1.6-.93l1.57.5a1 1 0 0 0 1.17-.47l1.27-2.2a1 1 0 0 0-.23-1.32l-1.34-1.04c.05-.32.08-.65.08-.99s-.03-.67-.08-.99z"/>
+                    <path d="M17.5 2.5a.75.75 0 0 1 1.06 0l2.44 2.44a.75.75 0 0 1-.53 1.28H19a8 8 0 1 1-7.99 8.5.75.75 0 1 1 1.5-.1A6.5 6.5 0 1 0 19 5.5h-1.47a.75.75 0 0 1-.53-1.28l2.44-2.44a.75.75 0 0 1 1.06 0z"/>
+                  </g>
+                </svg>
+                <span>Prozesse</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Form Content */}
+          <div>
+            <div className="company-data-popup-header">
+              <h2>Unternehmen</h2>
+              {activeSection === 'departments' && (
+                <button className="company-data-add-button" aria-label="Abteilung hinzufügen" type="button" style={{marginRight: '8px'}}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="11" y="4" width="2" height="16" rx="1"/>
+                    <rect x="4" y="11" width="16" height="2" rx="1"/>
+                  </svg>
+                </button>
+              )}
+              <button onClick={onClose} className="company-data-close-button" aria-label="Schließen">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                  <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="company-data-popup-form-with-sidebar">
+              {activeSection === 'departments' && (
+                <div className={`departments-fade-wrapper${departmentsFadeIn ? ' fade-in' : ''}`}>
+                  <div className="departments-colorbar">
+                    <div className="departments-row-top">
+                      <div className="departments-color departments-blue" style={{ background: colorBlue || undefined, padding: '2px', flex: 1.2 }}>
+                        <input
+                          type="text"
+                          className={formData.companyName ? 'filled' : ''}
+                          placeholder="Name"
+                          value={formData.companyName}
+                          onChange={e => setFormData({ ...formData, companyName: e.target.value })}
+                          style={{ width: '100%', height: '100%', background: '#1e2732', color: '#ececec', border: '1.5px solid #4a5568', borderRadius: '5px', padding: '8px 10px', fontSize: '1em', boxSizing: 'border-box', outline: 'none' }}
+                          onFocus={e => e.target.style.borderColor = '#5a9bd3'}
+                          onBlur={e => e.target.style.borderColor = formData.companyName ? '#1dbb86a6' : '#4a5568'}
+                        />
+                      </div>
+                      <div className="departments-color departments-green" style={{ background: colorGreen || undefined, padding: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 0.7 }}>
+                        <input
+                          type="text"
+                          className={departmentGreenInput ? 'filled' : ''}
+                          placeholder="KRZ"
+                          value={departmentGreenInput}
+                          onChange={e => setDepartmentGreenInput(e.target.value.toUpperCase())}
+                          style={{ width: '65px', height: '100%', background: '#1e2732', color: '#ececec', border: '1.5px solid #4a5568', borderRadius: '5px', padding: '8px 10px', fontSize: '1em', boxSizing: 'border-box', outline: 'none', textAlign: 'center', textTransform: 'uppercase', margin: '0 auto', display: 'block' }}
+                          onFocus={e => e.target.style.borderColor = '#5a9bd3'}
+                          onBlur={e => e.target.style.borderColor = departmentGreenInput ? '#1dbb86a6' : '#4a5568'}
+                          maxLength={4}
+                        />
+                      </div>
+                      <div className="departments-color departments-orange" style={{ background: colorOrange || undefined, padding: '2px', position: 'relative', flex: 1.1, minWidth: '120px', maxWidth: '180px' }}>
+                        <select
+                          className={departmentOrangeSelect ? 'filled' : ''}
+                          value={departmentOrangeSelect}
+                          onChange={e => setDepartmentOrangeSelect(e.target.value)}
+                          style={{ width: '100%', height: '100%', background: 'transparent', color: '#ececec', border: '1.5px solid #4a5568', borderRadius: '5px', padding: '8px 32px 8px 10px', fontSize: '1em', boxSizing: 'border-box', outline: 'none', appearance: 'none' }}
+                          onFocus={e => e.target.style.borderColor = '#5a9bd3'}
+                          onBlur={e => e.target.style.borderColor = departmentOrangeSelect ? '#1dbb86a6' : '#4a5568'}
+                        >
+                          <option value="" disabled hidden>Bereich wählen</option>
+                          <option value="Administration">Administration</option>
+                          <option value="Finanzen">Finanzen</option>
+                          <option value="Service">Service</option>
+                          <option value="Vertrieb">Vertrieb</option>
+                          <option value="Qualität">Qualität</option>
+                          <option value="Nachhaltigkeit">Nachhaltigkeit</option>
+                          <option value="Produktion">Produktion</option>
+                        </select>
+                        <span className="departments-dropdown-arrow" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#ececec', fontSize: '1.1em' }}>
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 10l5 5 5-5" stroke="#ececec" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </span>
+                      </div>
+                      <div className="departments-color departments-yellow" style={{ background: colorYellow || undefined, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '80px', height: '100%', flex: 0.6 }}>
+                        <svg
+                          className="departments-trash-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="22" height="22"
+                          style={{ cursor: 'pointer' }}
+                        >
+                          <g id="_01_align_center" data-name="01 align center">
+                            <path fill="#ececec" d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z" />
+                            <rect fill="#ececec" x="9" y="10" width="2" height="8" />
+                            <rect fill="#ececec" x="13" y="10" width="2" height="8" />
+                          </g>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="departments-color departments-red">
+                      <input
+                        type="text"
+                        className={departmentRedInput ? 'filled' : ''}
+                        placeholder="Aufgabe"
+                        value={departmentRedInput}
+                        onChange={e => setDepartmentRedInput(e.target.value)}
+                        style={{ width: '95%', height: '100%', background: '#1e2732', color: '#ececec', border: '1.5px solid #4a5568', borderRadius: '5px', padding: '8px 10px', fontSize: '1em', boxSizing: 'border-box', outline: 'none' }}
+                        onFocus={e => e.target.style.borderColor = '#5a9bd3'}
+                        onBlur={e => e.target.style.borderColor = departmentRedInput ? '#1dbb86a6' : '#4a5568'}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeSection === 'company' && renderCompanySection()}
+              {activeSection === 'design' && renderDesignSection()}
+              {activeSection === 'worktime' && (
+                <div className="popup-form-section">
+                  {/* Überschrift Eingaben */}
+                  <div className="section-label">Eingaben</div>
+                  <hr className="divider-row" />
+                  {/* Neue Zeile für Früheste Anfangszeit & Späteste Endzeit */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time" style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        id="earliestStartTime"
+                        name="earliestStartTime"
+                        value={formData.earliestStartTime || ''}
+                        onChange={handleChange}
+                        className={formData.earliestStartTime ? 'filled input-has-unit' : 'input-has-unit'}
+                        placeholder="Frühest möglicher Arbeitsbeginn"
+                        aria-label="Früheste Anfangszeit"
+                        maxLength={5}
+                      />
+                      {formData.earliestStartTime && (
+                        <span className="input-unit-inside">Arbeitsbeginn</span>
+                      )}
+                    </div>
+                    <div className="form-group form-group-time" style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        id="latestEndTime"
+                        name="latestEndTime"
+                        value={formData.latestEndTime || ''}
+                        onChange={handleChange}
+                        className={formData.latestEndTime ? 'filled input-has-unit' : 'input-has-unit'}
+                        placeholder="Spätest mögliches Arbeitsende"
+                        aria-label="Späteste Endzeit"
+                        maxLength={5}
+                      />
+                      {formData.latestEndTime && (
+                        <span className="input-unit-inside">Arbeitsende</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Neue Zeile für Beginn/Ende Kernarbeitszeit */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time" style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        id="coreStartTime"
+                        name="coreStartTime"
+                        value={coreStartTime}
+                        onChange={e => setCoreStartTime(e.target.value === '' || e.target.value === '-' || /^([0-2]?[0-9])?(:[0-5]?[0-9]?)?$/.test(e.target.value) ? e.target.value : coreStartTime)}
+                        className={coreStartTime ? 'filled input-has-unit' : 'input-has-unit'}
+                        placeholder="Beginn Kernarbeitszeit"
+                        aria-label="Beginn Kernarbeitszeit"
+                        maxLength={5}
+                      />
+                      {coreStartTime && coreStartTime !== '-' && (
+                        <span className="input-unit-inside">Kernbeginn</span>
+                      )}
+                    </div>
+                    <div className="form-group form-group-time" style={{ position: 'relative' }}>
+                      <input
+                        type="text"
+                        id="coreEndTime"
+                        name="coreEndTime"
+                        value={coreEndTime}
+                        onChange={e => setCoreEndTime(e.target.value === '' || e.target.value === '-' || /^([0-2]?[0-9])?(:[0-5]?[0-9]?)?$/.test(e.target.value) ? e.target.value : coreEndTime)}
+                        className={coreEndTime ? 'filled input-has-unit' : 'input-has-unit'}
+                        placeholder="Ende Kernarbeitszeit"
+                        aria-label="Ende Kernarbeitszeit"
+                        maxLength={5}
+                      />
+                      {coreEndTime && coreEndTime !== '-' && (
+                        <span className="input-unit-inside">Kernende</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Zeile für Arbeitszeit & Pausenzeit */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time">
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          id="dailyWorkingTime"
+                          name="dailyWorkingTime"
+                          value={formData.dailyWorkingTime}
+                          onChange={handleChange}
+                          className={formData.dailyWorkingTime ? 'filled input-has-unit' : 'input-has-unit'}
+                          placeholder="Tägliche Arbeitszeit (Std.)"
+                          aria-label="Tägliche Arbeitszeit (Std.)"
+                          style={{ paddingRight: formData.dailyWorkingTime ? '10.5em' : undefined }}
+                        />
+                        {formData.dailyWorkingTime && (
+                          <span className="input-unit-inside">Stunden tägliche Arbeitszeit</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="form-group form-group-time">
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          id="dailyBreakTime"
+                          name="dailyBreakTime"
+                          value={formData.dailyBreakTime}
+                          onChange={handleChange}
+                          className={formData.dailyBreakTime ? 'filled input-has-unit' : 'input-has-unit'}
+                          placeholder="Tägliche Pausenzeit (Min.)"
+                          aria-label="Tägliche Pausenzeit (Min.)"
+                          style={{ paddingRight: formData.dailyBreakTime ? '8.5em' : undefined }}
+                        />
+                        {formData.dailyBreakTime && (
+                          <span className="input-unit-inside">Minuten Pause</span>
+                                               )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Zeile für Urlaub und Sonderfreie Tage */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time">
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                                                   inputMode="decimal"
+                          id="vacationWeeks"
+                          name="vacationWeeks"
+                          value={vacationWeeks}
+                          onChange={e => setVacationWeeks(e.target.value)}
+                          className={vacationWeeks ? 'filled input-has-unit' : 'input-has-unit'}
+                          placeholder="Urlaubsanspruch (Wochen)"
+                          aria-label="Urlaubsanspruch (Wochen)"
+                          style={{ paddingRight: vacationWeeks ? '9.5em' : undefined }}
+                        />
+                        {vacationWeeks && (
+                          <span className="input-unit-inside">Wochen Urlaub im Jahr</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="form-group form-group-time">
+                      <div style={{ position: 'relative' }}>
+                        <input
+
+                          type="text"
+                          inputMode="decimal"
+                          id="specialDays"
+                          name="specialDays"
+                          value={specialDays}
+                          onChange={e => setSpecialDays(e.target.value)}
+                          className={specialDays ? 'filled input-has-unit' : 'input-has-unit'}
+                          placeholder="Sonderfreie Tage"
+                          aria-label="Sonderfreie Tage"
+                          style={{ paddingRight: specialDays ? '7.5em' : undefined }}
+                        />
+                        {specialDays && (
+                          <span className="input-unit-inside">{parseFloat(specialDays.replace(',', '.')) === 1 ? 'Sonderfreier Tag' : 'Sonderfreie Tage'}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Homeoffice-Tage Input (volle Breite, letzter Input vor dem Trenner) */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time" style={{width: '100%', position: 'relative'}}>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        id="maxHomeofficeDays"
+                        name="maxHomeofficeDays"
+                        value={maxHomeofficeDays}
+                        onChange={e => {
+                          // Nur Zahlen und maximal 1 Nachkommastelle erlauben
+                          const val = e.target.value;
+                          if (val === '' || /^\d{0,2}(\.|,)?\d{0,1}$/.test(val)) setMaxHomeofficeDays(val.replace(',', '.'));
+                        }}
+                        className={maxHomeofficeDays ? 'filled input-has-unit' : 'input-has-unit'}
+                        placeholder="Maximale Anzahl an Tagen Homeoffice pro Woche"
+                        aria-label="Maximale Anzahl an Tagen Homeoffice pro Woche"
+                        style={{ paddingRight: maxHomeofficeDays ? '13em' : undefined }}
+                      />
+                      {maxHomeofficeDays && (
+                        <span className="input-unit-inside">{parseFloat(maxHomeofficeDays.replace(',', '.')) === 1 ? 'Tag' : 'Tage'} Homeoffice pro Woche</span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Überschrift Ergebnisse */}
+                  <div className="section-label">Ergebnisse</div>
+                  <hr className="divider-row" />
+                  {/* Summenfelder */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time">
+                      <input
+                        type="text"
+                        id="timeFrameHours"
+                        name="timeFrameHours"
+                        value={
+                          timeFrameHours !== '-' ? `${timeFrameHours} Stunden Arbeitszeitrahmen` : ''
+                        }
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${timeFrameHours !== '-' ? 'active' : ''}`}
+                      />
+                    </div>
+                    <div className="form-group form-group-time">
+                      <input
+                        type="text"
+                        id="coreTimeFrameHours"
+                        name="coreTimeFrameHours"
+                        value={
+                          coreTimeFrameHours !== '-' ? `${coreTimeFrameHours} Stunden Kernarbeitszeit` : ''
+                        }
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${coreTimeFrameHours !== '-' ? 'active' : ''}`}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group form-group-time">
+                      <input
+                        type="text"
+                        id="totalWorkTime"
+                        name="totalWorkTime"
+                        value={totalWorkTimeDisplay}
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${formData.dailyWorkingTime && formData.dailyBreakTime ? 'active' : ''}`}
+                      />
+                    </div>
+                    <div className="form-group form-group-time">
+                      <input
+                        type="text"
+                        id="weeklyWorkTime"
+                        name="weeklyWorkTime"
+                        value={weeklyWorkTime === '-' ? '-' : `${weeklyWorkTime} Stunden wöchentlich`}
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${(formData.dailyWorkingTime && formData.dailyBreakTime) ? 'active' : ''}`}
+                      />
+                    </div>
+                  </div>
+                  <div className="form-row">
+                    <div className="form-group form-group-time" style={{width: '100%'}}>
+                      <input
+                        type="text"
+                        id="yearlyWorkHours"
+                        name="yearlyWorkHours"
+                        value={yearlyWorkHours === '-' ? '-' : `${yearlyWorkHours} Stunden im Jahr`}
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${yearlyWorkHours !== '-' ? 'active' : ''}`}
+                                           />
+                    </div>
+                  </div>
+                  {/* Homeoffice-Summenfeld mit orangefarbener Schrift */}
+                  <div className="form-row">
+                    <div className="form-group form-group-time" style={{width: '100%'}}>
+                      <input
+                        type="text"
+                        id="homeofficeYearlyHours"
+                        name="homeofficeYearlyHours"
+                        value={homeofficeYearlyHours === '-' ? '-' : `${homeofficeYearlyHours} Stunden Homeoffice im Jahr`}
+                        readOnly
+                        disabled
+                        className={`total-work-time-display ${(homeofficeYearlyHours !== '-' && maxHomeofficeDays && parseFloat(maxHomeofficeDays.replace(',', '.')) > 0) ? 'active homeoffice-sum-orange' : ''}`}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeSection === 'processes' && (
+                <div className={`processes-fade-wrapper${processesFadeIn ? ' fade-in' : ''}`}> 
+                  <div className="section-label">Management</div>
+                  <hr className="divider-row" />
+                  <div className="processes-rectangles-container">
+                    {managementNames.map((name, i) => (
+                      <div key={i} className="processes-rectangle">
+                        <div className="processes-rectangle-green">
+
+                          {i === 0 && name === "Leitung" && (
+                            <img src={Leitung} alt="" />
+                          )}
+
+                          {i === 1 && name === "Finanzen" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            <g>
+                              <path style={{fill: '#cfcfcf'}} d="M12,8.12A3.95,3.95,0,1,1,8,12.06,3.93,3.93,0,0,1,12,8.12"/>
+                              <path style={{fill: '#cfcfcf'}} d="M15.33,17.61l1.19,2.05A8.87,8.87,0,0,0,20.87,12H18.44v.06a6.5,6.5,0,0,1-3.11,5.55"/>
+                              <path style={{fill: '#ececec'}} d="M12,3.11a8.89,8.89,0,1,0,4.54,16.55l-1.19-2.05A6.49,6.49,0,1,1,12,5.57H12V3.11Z"/>
+                              <path style={{fill: '#1f54b7'}} d="M12,3.11V5.57A6.49,6.49,0,0,1,18.44,12h2.43A8.89,8.89,0,0,0,12,3.11"/>
+                              <path style={{fill: '#1f54b7'}} d="M12,9a3.12,3.12,0,1,1-3.11,3.11A3.11,3.11,0,0,1,12,9"/>
+                              <path style={{fill: '#ececec', fillRule: 'evenodd'}} d="M11.46,10.18v-.1a.5.5,0,0,1,.5-.5.5.5,0,0,1,.5.5v.1a1.51,1.51,0,0,1,.37.25,1.4,1.4,0,0,1,.26.39.5.5,0,0,1-.92.4.22.22,0,0,0-.05-.08.23.23,0,0,0-.16-.06.23.23,0,1,0,0,.45,1.23,1.23,0,0,1,.5,2.35V14a.5.5,0,0,1-.5.5.5.5,0,0,1-.5-.5v-.11a1.05,1.05,0,0,1-.37-.25,1.36,1.36,0,0,1-.27-.39.5.5,0,0,1,.93-.39.16.16,0,0,0,0,.07A.24.24,0,0,0,12,13h0a.23.23,0,0,0,0-.46,1.23,1.23,0,0,1-.5-2.35Z"/>
+                            </g>
+                          </svg>
+                          )}
+
+                          {i === 2 && name === "Personal" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            <path style={{fill:'#FFFFFF'}} d="M256,504C119.248,504,8,392.744,8,256S119.248,8,256,8s248,111.248,248,248S392.752,504,256,504z"/>
+                            <path style={{fill:'#1f54b7'}} d="M256,16c132.336,0,240,107.664,240,240S388.336,496,256,496S16,388.336,16,256S123.664,16,256,16   M256,0C114.616,0,0,114.616,0,256s114.616,256,256,256s256-114.616,256-256S397.384,0,256,0L256,0z"/>
+                            <g>
+                              <circle style={{fill:'#2c66d2'}} cx="122.168" cy="176.16" r="15.568"/>
+                              <path style={{fill:'#2c66d2'}} d="M139.552,197.92h-34.768c-12.256,0-22.24,9.976-22.24,22.24v43.608c0,4.464,3.624,8.088,8.088,8.088    s8.088-3.624,8.088-8.088v-39.112h4.856v36.872c0,0.016-0.008,0.032-0.008,0.048v82.448c0,4.464,3.624,8.088,8.088,8.088    s8.088-3.624,8.088-8.088v-66.328h4.848v66.328c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-66.328v-16.12v-36.928    h4.856v39.112c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-43.6C161.792,207.904,151.816,197.92,139.552,197.92z"/>
+                            </g>
+                            <g>
+                              <circle style={{fill:'#999999'}} cx="211.352" cy="176.16" r="15.568"/>
+                              <path style={{fill:'#999999'}} d="M228.736,197.92h-34.768c-12.256,0-22.24,9.976-22.24,22.24v43.608c0,4.464,3.624,8.088,8.088,8.088    s8.088-3.624,8.088-8.088v-39.112h4.856v36.872c0,0.016-0.008,0.032-0.008,0.048v82.448c0,4.464,3.624,8.088,8.088,8.088    s8.088-3.624,8.088-8.088v-66.328h4.848v66.328c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-66.328v-16.12v-36.928    h4.856v39.112c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-43.6C250.968,207.904,240.992,197.92,228.736,197.92z"/>
+                              <circle style={{fill:'#1f54b7'}} cx="300.592" cy="176.16" r="15.568"/>
+                              <path style={{fill:'#1f54b7'}} d="M317.976,197.92h-34.768c-12.256,0-22.24,9.976-22.24,22.24v43.608c0,4.464,3.624,8.088,8.088,8.088    s8.088-3.624,8.088-8.088v-39.112H282v36.872c0,0.016-0.008,0.032-0.008,0.048v82.448c0,4.464,3.624,8.088,8.088,8.088    c4.464,0,8.088-3.624,8.088-8.088v-66.328h4.848v66.328c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-66.328v-16.12    v-36.928h4.856v39.112c0,4.464,3.624,8.088,8.088,8.088c4.464,0,8.088-3.624,8.088-8.088v-43.6    C340.216,207.904,330.232,197.92,317.976,197.92z"/>
+                              <circle style={{fill:'#999999'}} cx="389.832" cy="176.16" r="15.568"/>
+                              <path style={{fill:'#999999'}} d="M407.216,197.92h-34.768c-12.256,0-22.24,9.976-22.24,22.24v43.608c0,4.464,3.624,8.088,8.088,8.088    c4.464,0,8.088-3.624,8.088-8.088v-39.112h4.856v36.872c0,0.016-0.008,0.032-0.008,0.048v82.448c0,4.464,3.624,8.088,8.088,8.088    c4.464,0,8.088-3.624,8.088-8.088v-66.328h4.848v66.328c0,4.464,3.624,8.088,8.088,8.088c4.464,0,8.088-3.624,8.088-8.088v-66.328    v-16.12v-36.928h4.856v39.112c0,4.464,3.624,8.088,8.088,8.088s8.088-3.624,8.088-8.088v-43.6    C429.456,207.904,419.48,197.92,407.216,197.92z"/>
+                            </g>
+                          </svg>
+                          )}
+
+                          {i === 3 && name === "Kommunikation" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 428.393 428.393" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <g>
+    <path style={{fill:'#cfcfcf'}} d="M294.534,417.277h124.603c5.112,0,9.256-4.144,9.256-9.256v-77.234c0-5.112-4.144-9.256-9.256-9.256   h-65.443l-36.047-25.137v25.137h-23.113c-5.112,0-9.256,4.144-9.256,9.256v77.234C285.278,413.133,289.422,417.277,294.534,417.277   z"/>
+    <path style={{fill:'#Ececec'}} d="M133.859,11.116H9.256C4.144,11.116,0,15.26,0,20.372l0,77.234c0,5.112,4.144,9.256,9.256,9.256   h65.443l36.047,25.137v-25.137h23.113c5.112,0,9.256-4.144,9.256-9.256V20.372C143.114,15.26,138.97,11.116,133.859,11.116z"/>
+    <g>
+      <rect x="26.557" y="37.989" style={{fill:'#404040'}} width="90" height="15"/>
+      <rect x="26.557" y="64.989" style={{fill:'#404040'}} width="90" height="15"/>
+    </g>
+    <g>
+      <rect x="311.835" y="348.404" style={{fill:'#2d2d2d'}} width="90" height="15"/>
+      <rect x="311.835" y="375.404" style={{fill:'#2d2d2d'}} width="90" height="15"/>
+    </g>
+    <g>
+      <path style={{fill:'#ececec'}} d="M321.752,213.416c0,1.46-0.029,2.914-0.087,4.362c-1.064,26.446-11.743,50.415-28.645,68.51    c-1.983,2.129-4.054,4.17-6.212,6.136c-11.307,10.283-24.83,18.176-39.772,22.875c-10.114,3.182-20.886,4.897-32.059,4.897    s-21.939-1.716-32.059-4.897c-14.942-4.694-28.471-12.592-39.777-22.875c-2.152-1.966-4.223-4.007-6.212-6.136    c-16.902-18.094-27.581-42.063-28.645-68.51c-0.058-1.448-0.087-2.902-0.087-4.362s0.029-2.914,0.087-4.362    c1.064-26.446,11.749-50.415,28.639-68.51c1.995-2.123,4.066-4.17,6.218-6.13c11.307-10.283,24.835-18.182,39.777-22.875    c10.12-3.182,20.886-4.897,32.059-4.897s21.945,1.716,32.059,4.897c14.942,4.699,28.465,12.592,39.772,22.875    c2.158,1.96,4.228,4.007,6.218,6.13c16.89,18.094,27.575,42.063,28.639,68.51C321.723,210.502,321.752,211.956,321.752,213.416z"/>
+      <g>
+        <path style={{fill:'#1f54b7'}} d="M293.019,286.287c-1.983,2.129-4.054,4.17-6.212,6.136c-3.176-3.129-6.526-6.026-10.021-8.684      c-2.327-1.768-4.723-3.432-7.177-4.984c-7.363-4.665-15.262-8.341-23.527-10.958c-2.78-0.89-5.595-1.652-8.451-2.292      c-7.352-1.658-14.942-2.507-22.654-2.507s-15.303,0.849-22.654,2.507c-2.856,0.64-5.677,1.407-8.457,2.292      c-8.265,2.623-16.163,6.299-23.527,10.958c-2.454,1.553-4.845,3.216-7.171,4.984c-3.501,2.658-6.846,5.555-10.027,8.684      c-2.152-1.966-4.223-4.007-6.212-6.136c3.81-3.757,7.84-7.206,12.069-10.33c2.373-1.757,4.798-3.414,7.288-4.961      c8.212-5.124,17.03-9.132,26.26-11.935c0.11-0.035,0.215-0.064,0.326-0.099c0.512-0.151,1.024-0.302,1.535-0.448      c0.285-0.081,0.576-0.163,0.861-0.238c0.105-0.029,0.204-0.058,0.308-0.087c0.366-0.099,0.739-0.198,1.111-0.297      c0.186-0.047,0.378-0.099,0.564-0.145c0.029-0.006,0.058-0.017,0.087-0.023c0.064-0.017,0.128-0.029,0.192-0.047      c0.355-0.093,0.71-0.18,1.064-0.262c0.256-0.064,0.512-0.128,0.768-0.186c0.279-0.07,0.558-0.128,0.838-0.192      c0.279-0.064,0.553-0.128,0.832-0.186c7.782-1.704,15.797-2.577,23.945-2.577s16.163,0.872,23.945,2.577      c2.862,0.622,5.694,1.361,8.486,2.21c9.23,2.803,18.048,6.811,26.255,11.935c2.489,1.547,4.921,3.205,7.294,4.961      C285.179,279.087,289.21,282.536,293.019,286.287z"/>
+        <path style={{fill:'#1f54b7'}} d="M293.025,140.544c-3.81,3.757-7.84,7.206-12.069,10.33c-2.373,1.762-4.804,3.42-7.294,4.967      c-8.207,5.124-17.024,9.131-26.249,11.929v0.006c-0.582,0.175-1.163,0.349-1.751,0.512c-0.285,0.081-0.576,0.163-0.867,0.244      c-0.529,0.145-1.064,0.291-1.599,0.43c-0.634,0.163-1.262,0.326-1.896,0.477c-0.233,0.058-0.471,0.116-0.71,0.169      c-0.553,0.134-1.111,0.256-1.669,0.378c-7.782,1.704-15.797,2.577-23.945,2.577s-16.163-0.872-23.945-2.577      c-2.867-0.622-5.7-1.361-8.492-2.21v-0.006c-9.225-2.798-18.042-6.805-26.255-11.929c-2.489-1.547-4.915-3.205-7.288-4.961      c-4.228-3.129-8.265-6.578-12.075-10.335c1.995-2.123,4.066-4.17,6.218-6.13c3.181,3.135,6.526,6.032,10.027,8.684      c2.327,1.768,4.717,3.432,7.171,4.979c7.363,4.665,15.262,8.34,23.527,10.964c2.78,0.884,5.595,1.652,8.451,2.292      c7.357,1.658,14.942,2.507,22.66,2.507c7.718,0,15.303-0.849,22.66-2.507c2.856-0.64,5.671-1.407,8.451-2.292      c8.265-2.623,16.158-6.299,23.521-10.958c2.455-1.553,4.851-3.216,7.177-4.984c3.496-2.652,6.846-5.549,10.021-8.684      C288.965,136.374,291.036,138.421,293.025,140.544z"/>
+      </g>
+      <path style={{fill:'#1f54b7'}} d="M294.648,209.053    c-0.576-21.043-5.328-41.074-13.691-58.18c-1.297-2.664-2.687-5.258-4.17-7.776c-1.553-2.658-3.205-5.229-4.95-7.701    c-7.23-10.237-15.628-18.269-24.801-23.858c-10.114-3.182-20.886-4.897-32.059-4.897s-21.939,1.716-32.059,4.897    c-9.172,5.589-17.571,13.622-24.801,23.858c-1.745,2.472-3.397,5.043-4.95,7.701c-1.483,2.518-2.873,5.113-4.17,7.782    c-8.37,17.106-13.116,37.131-13.697,58.174c-0.041,1.448-0.058,2.902-0.058,4.362s0.017,2.914,0.058,4.362    c0.582,21.043,5.328,41.074,13.697,58.18c1.297,2.67,2.687,5.264,4.17,7.782c1.553,2.652,3.205,5.223,4.95,7.695    c7.23,10.237,15.628,18.275,24.801,23.864c10.12,3.182,20.886,4.897,32.059,4.897s21.945-1.716,32.059-4.897    c9.172-5.589,17.571-13.627,24.801-23.864c1.745-2.472,3.397-5.043,4.95-7.695c1.483-2.518,2.873-5.112,4.17-7.782    c8.364-17.106,13.116-37.137,13.691-58.18c0.041-1.448,0.058-2.902,0.058-4.362S294.689,210.502,294.648,209.053z     M160.339,278.755c-1.437-2.484-2.792-5.072-4.054-7.759c-7.241-15.291-11.679-33.542-12.255-53.219    c-0.041-1.448-0.064-2.902-0.064-4.362s0.023-2.914,0.064-4.362c0.576-19.671,5.014-37.922,12.255-53.213    c1.262-2.687,2.617-5.275,4.054-7.765c9.672-16.797,22.986-29.07,38.178-34.293c-3.618,5.642-6.857,13.308-9.649,22.916    c-1.966,6.782-3.641,14.285-5.002,22.34c-0.483,2.844-0.925,5.752-1.326,8.73v0.006c-1.739,12.842-2.728,26.819-2.891,41.278    c-0.023,1.448-0.029,2.902-0.029,4.362s0.006,2.914,0.029,4.362c0.163,14.465,1.152,28.441,2.896,41.284    c0.395,2.978,0.838,5.892,1.32,8.736c1.361,8.055,3.036,15.564,5.002,22.34c2.792,9.603,6.031,17.268,9.649,22.91    C183.325,307.825,170.011,295.553,160.339,278.755z M214.977,315.834c-7.631,0-17.321-18.333-22.654-50.328    c-0.465-2.78-0.902-5.671-1.291-8.655c-1.53-11.58-2.501-24.661-2.658-39.074c-0.023-1.442-0.029-2.896-0.029-4.362    c0-1.466,0.006-2.92,0.029-4.362c0.157-14.413,1.128-27.493,2.658-39.068c0.39-2.984,0.82-5.874,1.285-8.655    c5.339-31.995,15.029-50.328,22.66-50.328s17.321,18.333,22.66,50.328c0.465,2.78,0.896,5.671,1.285,8.655    c1.53,11.574,2.501,24.655,2.658,39.068c0.023,1.442,0.029,2.896,0.029,4.362c0,1.466-0.006,2.92-0.029,4.362    c-0.157,14.413-1.128,27.493-2.658,39.074c-0.39,2.984-0.826,5.874-1.291,8.655C232.298,297.501,222.608,315.834,214.977,315.834z    M273.663,270.997c-1.262,2.687-2.617,5.275-4.054,7.759c-9.672,16.797-22.986,29.07-38.178,34.293    c3.618-5.642,6.863-13.308,9.649-22.91c1.966-6.776,3.647-14.285,5.002-22.34c0.489-2.844,0.931-5.758,1.326-8.736    c1.745-12.842,2.734-26.819,2.896-41.284c0.023-1.448,0.029-2.902,0.029-4.362s-0.006-2.914-0.029-4.362    c-0.163-14.459-1.152-28.436-2.891-41.278v-0.006c-0.401-2.978-0.843-5.886-1.326-8.73c-1.361-8.055-3.042-15.558-5.008-22.34    c-2.786-9.608-6.031-17.274-9.649-22.916c15.192,5.223,28.511,17.501,38.178,34.298c1.437,2.489,2.792,5.078,4.054,7.759    c7.241,15.291,11.679,33.542,12.255,53.213c0.041,1.448,0.064,2.902,0.064,4.362s-0.023,2.914-0.064,4.362    C285.342,237.454,280.904,255.706,273.663,270.997z"/>
+      <path style={{fill:'#1f54b7'}} d="M321.752,213.416c0,1.46-0.029,2.914-0.087,4.362H108.284c-0.058-1.448-0.087-2.902-0.087-4.362    s0.029-2.914,0.087-4.362h213.381C321.723,210.502,321.752,211.956,321.752,213.416z"/>
+    </g>
+  </g>
+</svg>
+                          )}
+
+                          {i === 4 && name === "Konformität" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="60" width="60" viewBox="0 0 504.123 504.123" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <circle style={{fill:'none'}} cx="252.062" cy="252.062" r="252.062"/>
+  <rect x="237.883" y="136.665" style={{fill:'#Ececec'}} width="28.357" height="248.123"/>
+  <g>
+    <rect x="192.197" y="361.157" style={{fill:'#cfcfcf'}} width="119.335" height="26.388"/>
+    <polygon style={{fill:'#cfcfcf'}} points="120.517,129.969 64.591,269.785 71.286,272.935 116.578,159.902 116.578,271.36     124.455,271.36 124.455,159.902 169.354,272.935 176.443,269.785  "/>
+  </g>
+  <path style={{fill:'#1f54b7'}} d="M64.591,271.754c0,31.508,25.206,56.714,55.926,56.714s55.926-25.6,55.926-56.714v-1.969H64.591   V271.754z"/>
+  <polygon style={{fill:'#cfcfcf'}} points="383.606,129.969 439.532,269.785 432.837,272.935 387.545,159.902 387.545,271.36    379.668,271.36 379.668,159.902 334.769,272.935 327.68,269.785 "/>
+  <path style={{fill:'#1f54b7'}} d="M439.532,271.754c0,31.508-25.206,56.714-55.926,56.714s-55.926-25.6-55.926-56.714v-1.969h111.852   V271.754z"/>
+  <rect x="169.748" y="383.212" style={{fill:'#1f54b7'}} width="164.628" height="26.388"/>
+  <path style={{fill:'#fbfbfb'}} d="M376.517,122.092c-18.117-1.969-93.342-49.625-124.455-14.966   c-31.114-35.052-106.338,12.997-124.455,14.572c-18.117,1.969-27.963-14.572-27.963-14.572l10.634,29.538h141.785H394.24   l10.634-29.538C404.874,107.126,395.028,123.668,376.517,122.092z"/>
+</svg>
+                          )}
+
+                          {i === 5 && name === "Datenschutz" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 128 128" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            <path style={{fill:'#fbfbfb'}} d="M100.75,86h7.92a17.24,17.24,0,0,0,1.42-34.42A19.43,19.43,0,0,0,82.78,29a33,33,0,0,0-61.22,16.8c0,.43,0,.85,0,1.27h0a19.47,19.47,0,1,0,0,38.94h5.69"/>
+                            <path style={{fill:'#ececec'}} d="M108.68,88h-7.92a2,2,0,0,1,0-4h7.92a15.24,15.24,0,0,0,1.26-30.43A2,2,0,0,1,108.17,51,17.43,17.43,0,0,0,83.66,30.78,2,2,0,0,1,81.07,30,31,31,0,0,0,23.56,45.79c0,.4,0,.8,0,1.2a2,2,0,0,1-2,2.08h-.08A17.47,17.47,0,1,0,21.56,84h5.69a2,2,0,1,1,0,4H21.56a21.47,21.47,0,0,1-2-42.85,35,35,0,0,1,64-18.68,21.46,21.46,0,0,1,29.28,19.91,20.82,20.82,0,0,1-.3,3.53A19.23,19.23,0,0,1,108.68,88Z"/>
+                            <rect style={{fill:'#1f54b7'}} height="60" transform="translate(128 152) rotate(-180)" width="58.29" x="34.86" y="46"/>
+                            <path style={{fill:'#ececec'}} d="M93.14,108H34.86a2,2,0,0,1-2-2V46a2,2,0,0,1,2-2H93.14a2,2,0,0,1,2,2v60A2,2,0,0,1,93.14,108Zm-56.29-4H91.14V48H36.86Z"/>
+                            <path style={{fill:'#ececec'}} d="M44,115a2,2,0,0,1-2-2v-7a2,2,0,0,1,4,0v7A2,2,0,0,1,44,115Z"/>
+                            <path style={{fill:'#ececec'}} d="M84,115a2,2,0,0,1-2-2v-7a2,2,0,0,1,4,0v7A2,2,0,0,1,84,115Z"/>
+                            <path style={{fill:'#ececec'}} d="M93,68H35a2,2,0,0,1,0-4H93a2,2,0,0,1,0,4Z"/>
+                            <path style={{fill:'#ececec'}} d="M93,88H35a2,2,0,0,1,0-4H93a2,2,0,0,1,0,4Z"/>
+                            <path style={{fill:'#ececec'}} d="M44,74a2,2,0,1,0,2,2,2,2,0,0,0-2-2Z"/>
+                            <path style={{fill:'#ececec'}} d="M44,54a2,2,0,1,0,2,2,2,2,0,0,0-2-2Z"/>
+                            <path style={{fill:'#ececec'}} d="M44,94a2,2,0,1,0,2,2,2,2,0,0,0-2-2Z"/>
+                          </svg>
+                          )}
+
+
+                        </div>
+                        <div className="processes-rectangle-red">{name}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="section-label">Performance</div>
+                  <hr className="divider-row" />
+                  <div className="processes-rectangles-container processes-middle-row">
+                    {leistungNames.map((name, i) => (
+                      <div key={i} className="processes-rectangle">
+                        <div className="processes-rectangle-green">
+                          {i === 0 && name === "Vertrieb" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <path style={{fill:'#c68c10'}} d="M243.9,379.6c-0.3-0.5-0.6-1.1-1-1.6c-7.3-11.9-22.4-17.5-35.2-11.1c-0.3,0.2-0.5,0.3-0.8,0.4   c-7.6,4-11.7,6.2-19.6,10.4c-7,3.7-16.2,0.1-20.3-8.2c-9.8-20.6-18.4-41.4-25.7-62.5c-2.9-8.3-5.6-16.7-8.1-25.1   c-5.2-18.8-9.4-37.8-12.8-57.2c-2-11.6-3.7-23.2-5.1-35c-0.9-9.2,4.9-17.2,12.8-17.8c1.3-0.1,2.4-0.2,3.5-0.3   c7-0.5,11.5-0.8,19.5-1.4c14.3-1.4,24.1-14.2,23.9-28.1c-0.2-12.3-0.2-19.3,0.4-30.1c0.1-1.8,0.2-3.6,0.3-5.6   c0.6-13.9-8.6-27.3-22.9-29.2c-4.3-0.5-7.6-0.8-10.8-1.2c-3-0.3-6.1-0.7-10.1-1.1c-20.4-2.2-90.4-6.8-94.9,62.8   c1.2,56.7,9.2,111.8,23.9,164.9c15.7,52.8,38.2,103.7,67.3,152.4c40.9,56.6,97.7,15.5,113.8,2.8c6.6-5.2,9.9-7.8,16.5-13   c4.4-3.7,7.1-8.4,8.4-13.5c1.9-7.8,0.3-16.5-4.5-23.4C254.6,396.7,250.7,390.7,243.9,379.6z"/>
+  <path style={{fill:'#c68c10'}} d="M279.6,274h-38.7c-3.9,0-7,3.1-7,7s3.1,7,7,7h25.2v16.1c0,3.9,3.1,7,7,7c3.9,0,7-3.1,7-7V288   c17.8-0.3,32.2-14.8,32.2-32.7c0-18-14.7-32.7-32.7-32.7h-13c-10.3,0-18.7-8.4-18.7-18.7c0-10.3,8.4-18.7,18.7-18.7h38.7   c3.9,0,7-3.1,7-7c0-3.9-3.1-7-7-7h-25.2v-16.1c0-3.9-3.1-7-7-7c-3.9,0-7,3.1-7,7v16.1c-17.8,0.3-32.2,14.8-32.2,32.7   c0,18,14.7,32.7,32.7,32.7h13c10.3,0,18.7,8.4,18.7,18.7C298.3,265.6,289.9,274,279.6,274z"/>
+  <path style={{fill:'#ececec'}} d="M273.1,27.8c-42.8,0-82.6,13.3-115.2,36.1c17.6,3.8,30.4,19.2,31.8,37.7c24-15.7,52.6-24.8,83.4-24.8   c84.4,0,152.8,68.4,152.8,152.8c0,84.4-68.4,152.8-152.8,152.8c-3.8,0-7.6-0.1-11.3-0.4c3.6,5.7,7,10.6,12.1,17.9l0.1,0.1   c6.4,9.3,9,20.5,7.3,31.3c107.7-4.3,193.6-92.9,193.6-201.6C474.9,118.2,384.6,27.8,273.1,27.8z"/>
+</svg>
+                          )}
+
+                          {i === 1 && name === "Vorbereitung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 64 64" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <polygon points="36 3 36 27 37 27 37 28 61 28 61 3 36 3" style={{fill:'#c68c10'}}/>
+  <path d="M37,3v9.38a4,4,0,1,1,0,5.24V27H27.62a4,4,0,1,0-5.24,0H13V3Z" style={{fill:'#d9dae2'}}/>
+  <path d="M51.62,27a4,4,0,1,0-5.24,0H37V37.38a4,4,0,1,1,0,5.24V51H61V27Z" style={{fill:'#d9dae2'}}/>
+  <path d="M28,45a8,8,0,1,0-15.133,3.621A17.9,17.9,0,0,1,15,56.73V57H25v-.276a16.562,16.562,0,0,1,2.034-7.915A7.943,7.943,0,0,0,28,45Z" style={{fill:'#ececec'}}/>
+  <path d="M21,58H19V50a3,3,0,0,1,3-3,1,1,0,0,0,1-1v-.893a1.083,1.083,0,0,0-.825-1.092A1,1,0,0,0,21,45a1,1,0,0,1-2,0,1,1,0,0,0-2,0H15a3,3,0,0,1,5-2.235c.02-.018.039-.035.059-.051A3.009,3.009,0,0,1,22.5,42.04,3.084,3.084,0,0,1,25,45.107V46a3,3,0,0,1-3,3,1,1,0,0,0-1,1Z" style={{fill:'#c68c10'}}/>
+  <rect height="4" style={{fill:'#c68c10'}} width="2" x="19" y="30"/>
+  <rect height="4" style={{fill:'#c68c10'}} transform="translate(-29.837 26.319) rotate(-59.998)" width="2" x="6.875" y="37"/>
+  <rect height="2" style={{fill:'#c68c10'}} transform="translate(-15.194 21.283) rotate(-29.995)" width="4" x="30.125" y="38"/>
+  <rect height="4" style={{fill:'#c68c10'}} transform="translate(-15.197 11.039) rotate(-30.002)" width="2" x="12" y="31.876"/>
+  <rect height="2" style={{fill:'#c68c10'}} transform="translate(-15.836 40.324) rotate(-60.005)" width="4" x="25" y="32.875"/>
+  <rect height="4" style={{fill:'#c68c10'}} width="10" x="15" y="57"/>
+  <path d="M37,51H61V27A24,24,0,0,1,37,51Z" style={{fill:'#cfcfd9'}}/>
+  <polygon points="15 11 15 5 21 5 15 11" style={{fill:'#fff'}}/>
+  <path style={{fill: 'none'}} d="M61,2H13a1,1,0,0,0-1,1V27a1,1,0,0,0,1,1h9.38a1,1,0,0,0,.658-1.753A2.955,2.955,0,0,1,22,24a3,3,0,0,1,6,0,2.955,2.955,0,0,1-1.038,2.247A1,1,0,0,0,27.62,28H36v9.38a1,1,0,0,0,1.753.658A2.955,2.955,0,0,1,40,37a3,3,0,0,1,0,6,2.955,2.955,0,0,1-2.247-1.038A1,1,0,0,0,36,42.62V51a1,1,0,0,0,1,1H61a1,1,0,0,0,1-1V3A1,1,0,0,0,61,2ZM60,26H53.573A4.91,4.91,0,0,0,54,24a5,5,0,0,0-10,0,4.91,4.91,0,0,0,.427,2H38V19.573A4.91,4.91,0,0,0,40,20a5,5,0,0,0,0-10,4.91,4.91,0,0,0-2,.427V4H60ZM25,19a5.006,5.006,0,0,0-5,5,4.91,4.91,0,0,0,.427,2H14V4H36v8.38a1,1,0,0,0,1.753.658A2.955,2.955,0,0,1,40,12a3,3,0,0,1,0,6,2.955,2.955,0,0,1-2.247-1.038A1,1,0,0,0,36,17.62V26H29.573A4.91,4.91,0,0,0,30,24,5.006,5.006,0,0,0,25,19ZM60,50H38V44.573A4.91,4.91,0,0,0,40,45a5,5,0,0,0,0-10,4.91,4.91,0,0,0-2,.427V28h8.38a1,1,0,0,0,.658-1.753A2.955,2.955,0,0,1,46,24a3,3,0,0,1,6,0,2.955,2.955,0,0,1-1.038,2.247A1,1,0,0,0,51.62,28H60Z"/>
+</svg>
+                          )}
+
+                            {i === 2 && name === "Beschaffung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="52" width="52" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <path style={{fill:'#ececec'}} d="M127.5,109.2c7.3,1.5,10.9,2.3,18.2,3.9c11.4,2.1,21.8-5.6,24.8-16.4c3-11.1,4.7-16.6,8.5-27.5   c3.6-10.7-0.6-23-11.2-27.7c-6.3-2.6-9.4-3.9-15.7-6.4c-15.3-6.3-68.4-25.4-87.4,27.5C53,106.6,46.9,151,46.5,195.4   c0.4,44.4,6.5,88.7,18.2,132.9c19,52.9,72.1,33.8,87.4,27.5c6.3-2.6,9.4-3.9,15.7-6.4c10.6-4.7,14.8-17.1,11.2-27.7   c-3.8-10.9-5.5-16.4-8.5-27.5c-3-10.8-13.4-18.5-24.8-16.4c-7.3,1.5-10.9,2.3-18.2,3.9c-6.2,1.3-12.5-3.5-13.9-10.9   c-4.2-25.3-6.4-50.3-6.7-75.3c0.3-25,2.5-50.1,6.7-75.3C115,112.7,121.3,107.9,127.5,109.2z"/>
+  <path style={{fill:'#ececec'}} d="M447.3,183.7c-19-52.9-72.1-33.8-87.4-27.5c-6.3,2.6-9.4,3.9-15.7,6.4c-10.6,4.7-14.8,17.1-11.2,27.7   c3.8,10.9,5.5,16.4,8.5,27.5c3,10.8,13.4,18.5,24.8,16.4c7.3-1.5,10.9-2.3,18.2-3.9c6.2-1.3,12.5,3.5,13.9,10.9   c4.2,25.3,6.4,50.3,6.7,75.3c-0.3,25-2.5,50.1-6.7,75.3c-1.3,7.3-7.7,12.2-13.9,10.9c-7.3-1.5-10.9-2.3-18.2-3.9   c-11.4-2.1-21.8,5.6-24.8,16.4c-3,11.1-4.7,16.6-8.5,27.5c-3.6,10.7,0.6,23,11.2,27.7c6.3,2.6,9.4,3.9,15.7,6.4   c15.3,6.3,68.4,25.4,87.4-27.5c11.7-44.2,17.8-88.5,18.2-132.9C465.1,272.2,459,227.9,447.3,183.7z"/>
+  <path style={{fill:'#c68c10'}} d="M257.4,142c8.3,4.5,17.8,7.1,28,7.1c32.3,0,58.4-26.2,58.4-58.4s-26.2-58.4-58.4-58.4   c-32.3,0-58.4,26.2-58.4,58.4c0,7.8,1.5,15.1,4.2,21.9l-34.7,41.5L257.4,142z M288.1,97.7h-5.5c-9.9,0-18-8.1-18-18   c0-8.4,5.9-15.5,13.7-17.5v-3.4c0-3.9,3.1-7,7-7s7,3.1,7,7v2.9h6.7c3.9,0,7,3.1,7,7s-3.1,7-7,7h-16.5c-2.2,0-4,1.8-4,4s1.8,4,4,4   h5.5c9.9,0,18,8.1,18,18c0,8.4-5.9,15.5-13.7,17.5v3.4c0,3.9-3.1,7-7,7s-7-3.1-7-7v-2.9h-6.7c-3.9,0-7-3.1-7-7s3.1-7,7-7h16.5   c2.2,0,4-1.8,4-4S290.3,97.7,288.1,97.7z"/>
+  <path style={{fill:'#c68c10'}} d="M309,292.5c2.7-6.8,4.2-14.2,4.2-21.9c0-32.3-26.2-58.4-58.4-58.4c-32.3,0-58.4,26.2-58.4,58.4   c0,32.3,26.2,58.4,58.4,58.4c10.1,0,19.7-2.6,28-7.1l61,12L309,292.5z M287,257.8l-35.6,35.6c-1.4,1.4-3.2,2.1-5,2.1   s-3.6-0.7-5-2.1l-18.8-18.8c-2.7-2.7-2.7-7.2,0-9.9c2.7-2.7,7.2-2.7,9.9,0l13.8,13.8l30.6-30.6c2.7-2.7,7.2-2.7,9.9,0   C289.7,250.6,289.7,255,287,257.8z"/>
+</svg>
+                          )}
+
+                          {i === 3 && name === "Realisierung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 53 53" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <rect x="27" y="28" style={{fill:'#ececec'}} width="2" height="18"/>
+  <rect x="37.5" y="2.893" transform="matrix(0.7071 0.7071 -0.7071 0.7071 20.8223 -23.2696)" style={{fill:'#ececec'}} width="2" height="21.213"/>
+  <rect x="15" y="21.858" transform="matrix(0.7071 0.7071 -0.7071 0.7071 30.1421 -0.7696)" style={{fill:'#ececec'}} width="2" height="28.284"/>
+  <rect x="10.722" y="13.5" transform="matrix(0.7071 0.7071 -0.7071 0.7071 15.6716 -8.8345)" style={{fill:'#ececec'}} width="15.556" height="2"/>
+  <rect x="26.893" y="32.5" transform="matrix(0.7071 0.7071 -0.7071 0.7071 34.6716 -16.7046)" style={{fill:'#ececec'}} width="21.213" height="2"/>
+  <circle style={{fill:'#cfcfcf'}} cx="48" cy="5" r="5"/>
+  <circle style={{fill:'#fbfbfb'}} cx="28" cy="48" r="5"/>
+  <circle style={{fill:'#e0a628'}} cx="5" cy="46" r="5"/>
+  <circle style={{fill:'#fbfbfb'}} cx="12" cy="8" r="3"/>
+  <circle style={{fill:'#fbfbfb'}} cx="44" cy="40" r="3"/>
+  <circle style={{fill:'#c68c10'}} cx="28" cy="24" r="11"/>
+</svg>
+                          )}
+
+                          {i === 4 && name === "Prüfung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="76" width="76" viewBox="0 0 64 64" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  {/* Schatten des Rechtecks */}
+  <path style={{opacity: 0.1, fill: '#231F20'}} d="M46,45c0,2.2-1.8,4-4,4H22c-2.2,0-4-1.8-4-4V25c0-2.2,1.8-4,4-4h20c2.2,0,4,1.8,4,4V45z"/>
+  
+  {/* Das Kästchen (mit dünnerem Rand gezeichnet) */}
+  <path style={{fill: 'none', stroke: '#ececec', strokeWidth: 2}} d="M22,45c-1.1,0-2-0.9-2-2V23c0-1.1,0.9-2,2-2h20c1.1,0,2,0.9,2,2v20c0,1.1-0.9,2-2,2H22z"/>
+  
+  {/* Schatten des Hakens */}
+  <path style={{opacity: 0.1, fill: '#231F20'}} d="M32.5,41c-0.6,0-1.2-0.3-1.6-0.8l-6.1-8c-0.7-0.9-0.5-2.1,0.4-2.8c0.9-0.7,2.1-0.5,2.8,0.4l4.2,5.5      c2.3-4.2,7.3-11.8,15.3-16.9c0.9-0.6,2.2-0.3,2.8,0.6c0.6,0.9,0.3,2.2-0.6,2.8c-10.2,6.6-15.2,18-15.3,18.1      c-0.3,0.7-0.9,1.1-1.6,1.2C32.6,41,32.5,41,32.5,41z"/>
+  
+  {/* Der Haken selbst */}
+  <path style={{fill: '#c68c10'}} d="M32.5,39c-0.6,0-1.2-0.3-1.6-0.8l-6.1-8c-0.7-0.9-0.5-2.1,0.4-2.8c0.9-0.7,2.1-0.5,2.8,0.4l4.2,5.5    c2.3-4.2,7.3-11.8,15.3-16.9c0.9-0.6,2.2-0.3,2.8,0.6c0.6,0.9,0.3,2.2-0.6,2.8c-10.2,6.6-15.2,18-15.3,18.1    c-0.3,0.7-0.9,1.1-1.6,1.2C32.6,39,32.5,39,32.5,39z"/>
+</svg>
+                          )}
+
+                          {i === 5 && name === "Lieferung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 512 512" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+  <g transform="translate(26 3)">
+    <path 
+      d="M320,168V104a40,40,0,0,0-40-40H88a40,40,0,0,0-40,40V408a40,40,0,0,0,40,40H280a40,40,0,0,0,40-40V344" 
+      style={{
+        fill: 'none',
+        stroke: '#ececec',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        strokeWidth: 32
+      }}
+    />
+    <polyline 
+      points="384 176 464 256 384 336" 
+      style={{
+        fill: 'none',
+        stroke: '#c68c10',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        strokeWidth: 32
+      }}
+    />
+    <line 
+      x1="191" 
+      y1="256" 
+      x2="464" 
+      y2="256" 
+      style={{
+        fill: 'none',
+        stroke: '#c68c10',
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        strokeWidth: 32
+      }}
+    />
+  </g>
+</svg>
+                          )}
+
+                        </div>
+                        <div className="processes-rectangle-red">{name}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="section-label">Support</div>
+                  <hr className="divider-row" />
+                  <div className="processes-rectangles-container processes-bottom-row">
+                    {supportNames.map((name, i) => (
+                      <div key={i} className="processes-rectangle">
+                        <div className="processes-rectangle-green">
+                          {i === 0 && name === "Service" && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              height="44"
+                              width="44"
+                              viewBox="0 0 491.52 491.52"
+                              style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}
+                            >
+                              <path style={{fill:'#cfcfcf'}} d="M470.097,336.482h-26.81V219.955c0-106.379-88.612-192.926-197.528-192.926 S48.233,113.576,48.233,219.955v116.527h-26.81V219.955c0-121.277,100.635-219.943,224.335-219.943 c123.699,0,224.339,98.666,224.339,219.943V336.482z"/>
+                              <path style={{fill:'#3cc799'}} d="M350.194,273.835v108.747c0,23.478,18.887,42.51,42.185,42.51V231.325 C369.081,231.325,350.194,250.357,350.194,273.835z"/>
+                              <path style={{fill:'#cfcfcf'}} d="M392.379,231.325L392.379,231.325v193.768l0,0c23.298,0,42.185-19.033,42.185-42.51V273.835 C434.564,250.357,415.677,231.325,392.379,231.325z"/>
+                              <path style={{fill:'#ececec'}} d="M434.564,270.813v114.79c31.456,0,56.956-25.697,56.956-57.395 C491.52,296.51,466.02,270.813,434.564,270.813z"/>
+                              <path style={{fill:'#3cc799'}} d="M141.326,273.835v108.747c0,23.478-18.887,42.51-42.185,42.51V231.325 C122.439,231.325,141.326,250.357,141.326,273.835z"/>
+                              <path style={{fill:'#cfcfcf'}} d="M99.141,231.325L99.141,231.325v193.768l0,0c-23.298,0-42.185-19.033-42.185-42.51V273.835 C56.956,250.357,75.843,231.325,99.141,231.325z"/>
+                              <g>
+                                <path style={{fill:'#ececec'}} d="M56.956,270.813v114.79C25.5,385.604,0,359.907,0,328.209C0,296.51,25.5,270.813,56.956,270.813z"/>
+                                <path style={{fill:'#ffffff'}} d="M267.88,481.232l-0.227-9.006c111.6-2.849,166.686-94.998,167.228-95.93l7.706,4.573 C442.015,381.836,384.38,478.259,267.88,481.232z"/>
+                              </g>
+                              <g>
+                                <path style={{fill:'#3cc799'}} d="M472.701,347.484c4.184-8.686,0.589-19.143-8.029-23.36c-8.62-4.217-18.998-0.594-23.181,8.09 c-3.076,6.384-1.921,13.705,2.316,18.823l-13.581,28.19l12.785,6.255l13.581-28.19 C463.201,357.481,469.626,353.868,472.701,347.484z"/>
+                                <ellipse style={{fill:'#3cc799'}} cx="260.664" cy="475.712" rx="22.989" ry="15.795"/>
+                              </g>
+                            </svg>
+                          )}
+
+                          {i === 1 && name === "Umwelt" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 504.125 504.125" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                              <path style={{fill:'#1ea176'}} d="M339.772,0c0,0,44.536,108.954-146.337,182.138C89.719,221.893,10.059,323.789,105.173,481.193  c7.877-70.357,41.653-225.485,186.888-260.884c0,0-135.176,50.546-147.117,279.347c69.459,9.752,232.361,16.305,280.726-125.062  C489.536,187.817,339.772,0,339.772,0z"/>
+                              <path style={{fill:'#3cc799'}} d="M145.007,498.704c147.456-58.849,254.748-196.71,269.556-361.283C384.418,56.107,339.772,0,339.772,0  s44.536,108.954-146.337,182.138C89.719,221.893,10.059,323.789,105.173,481.193c7.877-70.357,41.653-225.485,186.888-260.884  C292.053,220.31,157.279,270.73,145.007,498.704z"/>
+                              <circle style={{fill:'#3cc799'}} cx="90.459" cy="171.985" r="13.785"/>
+                              <g>
+                                <circle style={{fill:'#3cc799'}} cx="133.782" cy="158.2" r="9.846"/>
+                                <circle style={{fill:'#26ba89'}} cx="124.921" cy="64.662" r="24.615"/>
+                                <circle style={{fill:'#3cc799'}} cx="200.736" cy="120.785" r="7.877"/>
+                                <circle style={{fill:'#3cc799'}} cx="266.713" cy="76.477" r="22.646"/>
+                              </g>
+                            </svg>
+                          )}
+
+                          {i === 2 && name === "Arbeitsmittel" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 443.489 443.489" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            <path style={{fill:'#B3B3B3'}} d="M46.83,35.454l27.57,59.62l-29.17,13.41v-0.01C30.27,86.734,30.41,57.234,46.83,35.454z"/>
+                            <polygon style={{fill:'#808080'}} points="85.12,116.174 97.18,141.744 84.23,147.844 72.03,121.964 84.97,115.864  "/>
+                            <polygon style={{fill:'#808080'}} points="110.48,103.834 122.68,129.714 109.74,135.814 109.59,135.504 97.53,109.944  "/>
+                            <polygon style={{fill:'#999999'}} points="109.59,135.504 109.74,135.814 97.18,141.744 85.12,116.174 84.97,115.864 97.53,109.944      "/>
+                            <path style={{fill:'#CCCCCC'}} d="M97.18,141.744l12.56-5.93l12.94-6.1l-12.2-25.88l-12.95,6.11l-12.56,5.92l-12.94,6.1l12.2,25.88     L97.18,141.744z M155.39,76.794c0,4.96-0.41,9.84-1.68,14.43c-0.92,3.35-5.14,13.99-5.14,13.99l-0.02,0.05l-23.2,56.88    c-5.56,13.63-8.65,28.14-9.12,42.85l-1.91-0.07h-44.9c-2.78-18.6-9.76-36.41-20.52-52.03l-24.09-35.03l15.52-7.13l4.9-2.25     l29.17-13.41l49.03-22.54l-26.67-58.15C129.48,16.394,155.39,43.564,155.39,76.794z"/>
+                            <path style={{fill:'#999999'}} d="M116.15,375.974v30.45c0,12.53-10.15,22.69-22.68,22.69c-6.27,0-11.93-2.54-16.04-6.65    c-4.1-4.1-6.64-9.77-6.64-16.04v-30.45h1.22h41.69H116.15z M103.03,405.734c0-5.19-4.2-9.4-9.4-9.4c-5.19,0-9.4,4.21-9.4,9.4     s4.21,9.4,9.4,9.4C98.83,415.134,103.03,410.924,103.03,405.734z"/>
+                              <path style={{fill:'#999999'}} d="M114.32,204.924l1.91,0.07c-0.06,1.35-0.08,2.7-0.08,4.06v11.2h-2.45H72.01l-1.26,0.04     c-0.12-5.16-0.57-10.29-1.33-15.37H114.32z"/>
+                              <path style={{fill:'#3cc799'}} d="M116.15,220.254v155.72h-2.45H72.01h-1.22v-152.67c0-1-0.01-2-0.04-3.01l1.26-0.04h41.69H116.15z"/>
+                              <path style={{fill:'#CCCCCC'}} d="M302.184,44.604c1.05,16.29-6.12,30.95-17.76,40.25c-16.08,12.85-25.14,32.57-25.14,53.15v204.34        c0,11.07,2.75,21.93,7.8,31.78c3.33,6.49,5.2,13.84,5.2,21.63c0,26.74-22.1,48.31-49.03,47.46l13.98-26.66        c5.39-10.27,1.43-22.96-8.85-28.35c-3.11-1.63-6.45-2.41-9.74-2.41c-7.55,0-14.85,4.09-18.61,11.25l-13.82,26.36        c-5.05-7.01-8.24-15.43-8.82-24.52c-1.05-16.28,6.12-30.95,17.76-40.25c16.08-12.85,25.13-32.56,25.13-53.15v-204.34        c0-11.06-2.74-21.93-7.79-31.78c-3.33-6.48-5.21-13.83-5.21-21.62c0-26.75,22.11-48.32,49.04-47.47l-13.98,26.66        c-5.39,10.27-1.43,22.97,8.84,28.35c3.12,1.63,6.45,2.41,9.74,2.41c7.56,0,14.86-4.09,18.62-11.25l13.82-26.36        C298.404,27.094,301.604,35.514,302.184,44.604z M247.784,310.744v-178c0-4.42-3.58-8-8-8c-2.2,0-4.2,0.89-5.65,2.34        c-1.45,1.45-2.35,3.45-2.35,5.66v178c0,4.42,3.59,8,8,8C244.204,318.744,247.784,315.164,247.784,310.744z"/>
+                              <path style={{fill:'#3cc799'}} d="M231.784,124.744 h16 v186 h-16 z"/>
+                              <polygon style={{fill:'#3cc799'}} points="418.427,285.364 418.427,295.094 401.927,302.594 357.927,302.594 341.427,295.094     341.427,285.364 371.927,285.364 387.927,285.364    "/>
+                              <path style={{fill:'#3cc799'}} d="M401.927,316.594v97.5c0,1.47-0.14,2.9-0.42,4.29l-1.58-0.29h-40.5l-1.09,0.2       c-0.27-1.36-0.41-2.76-0.41-4.2v-97.5h1.5h40.5H401.927z"/>
+                              <polygon style={{fill:'#999999'}} points="401.927,302.594 401.927,316.594 399.927,316.594 359.427,316.594 357.927,316.594     357.927,302.594      "/>
+                             <path style={{fill:'#999999'}} d="M399.927,418.094l1.58,0.29c-0.86,4.36-3,8.25-6.02,11.27c-3.98,3.98-9.48,6.44-15.56,6.44        c-10.71,0-19.64-7.66-21.59-17.8l1.09-0.2H399.927z"/>
+                            <polygon style={{fill:'#CCCCCC'}} points="388.467,31.694 397.007,63.014 388.467,77.804 387.927,77.804 387.927,285.364     371.927,285.364 371.927,77.804 371.387,77.804 362.847,63.014 371.387,31.694    "/>
+                            </svg>
+                            )}
+
+                            {i === 3 && name === "Logistik" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            {/* Oben */}
+                            <path style={{fill:'#ececec'}} d="m4 2-2 5h20l-2-5h-4-8z"/>
+                            <path style={{fill:'#3cc799'}} d="m9 7h6l-1-5h-4z"/>
+                            
+                            {/* Hauptkörper */}
+                            <path style={{fill:'none'}} d="m2 6h20l-2 13h-17z"/>
+                            <rect height="16" width="20" y="7" x="2" style={{fill:'#cfcfcf'}}/>
+                            
+                            {/* Unten */}
+                            <path style={{fill:'#ecf0f1'}} d="m5 17c-0.5523 0-1 0.4-1 1v2c0 0.5 0.4477 1 1 1h6c0.552 0 1-0.5 1-1v-2c0-0.6-0.448-1-1-1h-6z"/>
+                            <path style={{fill:'#26ba89'}} d="m9 7v6 1l1-1 1 1 1-1 1 1 1-1 1 1v-1-6h-6z"/>
+                            
+                            {/* Kleine Details unten */}
+                            <rect height="2" width="1" y="18" x="5" style={{fill:'#95a5a6'}}/>
+                            <rect height="2" width="1" y="18" x="7" style={{fill:'#95a5a6'}}/>
+                            <rect height="2" width="1" y="18" x="9" style={{fill:'#95a5a6'}}/>
+                            <rect height="2" width="1" y="18" x="10" style={{fill:'#7f8c8d'}}/>
+                            <rect height="2" width="1" y="18" x="8" style={{fill:'#bdc3c7'}}/>
+                          </svg>
+                            )}
+
+                          {i === 4 && name === "Umgebung" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="68" width="68" viewBox="0 0 125 125" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            {/* Diese Gruppe verschiebt alle sichtbaren Elemente 3px nach unten */}
+                            <g transform="translate(0 10)">
+                              <rect x="14" y="14" width="97" height="97" style={{fill: 'none'}}/>
+                              <path d="M61.5 89C78.3447 89 92 85.1672 92 80.4393C92 76.3137 81.6027 72.8697 67.7617 72.0591C67.0711 72.0186 66.4107 72.3465 66.0182 72.9162L62.7467 77.6653C61.953 78.8175 60.2518 78.8195 59.4554 77.6692L56.1957 72.9612C55.7998 72.3894 55.1338 72.0629 54.4398 72.109C40.9993 73.0031 31 76.3934 31 80.4393C31 85.1672 44.6553 89 61.5 89Z" fill="url(#paint0_linear)"/>
+                              <path style={{fill: '#26ba89'}} d="M91 81C91 81.6661 90.5094 82.5307 89.0502 83.499C87.6296 84.4417 85.5079 85.3295 82.7965 86.0906C77.3876 87.6087 69.8578 88.5607 61.5 88.5607V90.5607C69.9869 90.5607 77.7071 89.5964 83.337 88.0162C86.145 87.228 88.49 86.2711 90.1561 85.1655C91.7837 84.0854 93 82.6979 93 81H91ZM61.5 88.5607C53.1422 88.5607 45.6124 87.6087 40.2035 86.0906C37.4921 85.3295 35.3704 84.4417 33.9498 83.499C32.4906 82.5307 32 81.6661 32 81H30C30 82.6979 31.2163 84.0854 32.8439 85.1655C34.51 86.2711 36.855 87.228 39.663 88.0162C45.2929 89.5964 53.0131 90.5607 61.5 90.5607V88.5607Z"/>
+                              <path d="M75.5 59.1421C78 55.5 79.844 52.7814 80.6157 48.9018C81.3874 45.0222 80.9914 41.0009 79.4776 37.3463C77.9638 33.6918 75.4004 30.5682 72.1114 28.3706C68.8224 26.173 64.9556 25 61 25C57.0444 25 53.1776 26.173 49.8886 28.3706C46.5996 30.5682 44.0362 33.6918 42.5224 37.3463C41.0087 41.0009 40.6126 45.0222 41.3843 48.9018C42.156 52.7814 44 55.5 46.5 59.1421" style={{fill: 'none', stroke: '#ececec', strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round'}}/>
+                              <path d="M43 53.5L61 82L79 53.5" style={{fill: 'none', stroke: '#ececec', strokeWidth: 3, strokeLinecap: 'round', strokeLinejoin: 'round'}}/>
+                              <circle cx="61" cy="45" r="8" style={{fill: 'none', stroke: '#cfcfcf', strokeWidth: 2}}/>
+                            </g>
+                            <defs>
+                              <linearGradient id="paint0_linear" x1="65.5" y1="68.5" x2="52" y2="118.5" gradientUnits="userSpaceOnUse">
+                                <stop offset="0.117083" style={{stopColor: '#34ECE1', stopOpacity: 0}}/>
+                                <stop offset="1" style={{stopColor: '#34F0E5'}}/>
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                          )}
+
+                          {i === 5 && name === "Sicherheit" && (
+                            <svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 36 36" style={{ filter: 'drop-shadow(0 2px 8px rgba(30,43,60,0.25))' }}>
+                            <path style={{fill: '#cfcfcf'}} d="M33 3c-7-3-15-3-15-3S10 0 3 3C0 18 3 31 18 36c15-5 18-18 15-33z"/>
+                            <path style={{fill: '#3cc799'}} d="M18 33.884C6.412 29.729 1.961 19.831 4.76 4.444C11.063 2.029 17.928 2 18 2c.071 0 6.958.04 13.24 2.444c2.799 15.387-1.652 25.285-13.24 29.44z"/>
+                            <path style={{fill: '#26ba89'}} d="M31.24 4.444C24.958 2.04 18.071 2 18 2v31.884c11.588-4.155 16.039-14.053 13.24-29.44z"/>
+                            </svg>
+                            )}
+
+                        </div>
+                        <div className="processes-rectangle-red">{name}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CompanyDataPopup;

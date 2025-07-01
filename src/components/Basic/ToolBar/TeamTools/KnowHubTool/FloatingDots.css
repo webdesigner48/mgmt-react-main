@@ -1,0 +1,110 @@
+/* FloatingDots.css */
+.content-square {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .floating-dot {
+    position: absolute;
+    border-radius: 50%;
+    /* The base animations are now set on the individual dot types */
+  }
+  
+  .drop-dot {
+    background: linear-gradient(45deg, #a8d8ee, #89cff0, #74bde0);
+    background-size: 200% 200%;
+    width: 2px;
+    height: 2px;
+    animation-name: gradient-shift, opacity-shift, drop-shadow-shift, fluid-movement;
+    animation-duration: 8s, 5s, 5s, 10s;
+    animation-timing-function: ease, ease-in-out, ease-in-out, ease-in-out;
+    animation-iteration-count: infinite, infinite, infinite, infinite;
+    animation-direction: alternate, alternate, alternate, alternate;
+  }
+  
+  .flow-dot {
+    background: linear-gradient(45deg, #a3e9a4, #90ee90, #7ad77a);
+    background-size: 200% 200%;
+    width: 9px;
+    height: 9px;
+    animation-name: gradient-shift, opacity-shift, flow-shadow-shift, fluid-movement;
+    animation-duration: 8s, 5s, 5s, 10s;
+    animation-timing-function: ease, ease-in-out, ease-in-out, ease-in-out;
+    animation-iteration-count: infinite, infinite, infinite, infinite;
+    animation-direction: alternate, alternate, alternate, alternate;
+  }
+  
+  .describtion-dot {
+    background: linear-gradient(45deg, #fde488, #ffd700, #eecb00);
+    background-size: 200% 200%;
+    width: 12px;
+    height: 12px;
+    animation-name: gradient-shift, opacity-shift, describtion-shadow-shift, fluid-movement;
+    animation-duration: 8s, 5s, 5s, 10s;
+    animation-timing-function: ease, ease-in-out, ease-in-out, ease-in-out;
+    animation-iteration-count: infinite, infinite, infinite, infinite;
+    animation-direction: alternate, alternate, alternate, alternate;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  @keyframes opacity-shift {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes drop-shadow-shift {
+    0% {
+      box-shadow: 0 0 4px 4px #a8d8eec7;
+    }
+    100% {
+      box-shadow: 0 0 2px 2px #a8d8ee;
+    }
+  }
+
+  @keyframes flow-shadow-shift {
+    0% {
+      box-shadow: 0 0 4px 4px #a3e9a4c5;
+    }
+    100% {
+      box-shadow: 0 0 2px 2px #a3e9a4;
+    }
+  }
+
+  @keyframes describtion-shadow-shift {
+    0% {
+      box-shadow: 0 0 4px 4px #fde488d2;
+    }
+    100% {
+      box-shadow: 0 0 2px 2px #fde488;
+    }
+  }
+
+  @keyframes fluid-movement {
+    0% {
+      border-radius: 50% 50% 50% 50%;
+    }
+    25% {
+      border-radius: 40% 60% 60% 40%;
+    }
+    50% {
+      border-radius: 60% 40% 40% 60%;
+    }
+    75% {
+      border-radius: 45% 55% 55% 45%;
+    }
+    100% {
+      border-radius: 50% 50% 50% 50%;
+    }
+  }

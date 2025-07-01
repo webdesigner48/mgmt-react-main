@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notiz Komponente (Pures CSS)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Globale Stile und Body-Setup */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* Dunkelgrauer Hintergrund */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+            margin: 0;
+            overflow: hidden; 
+        }
+
+        /* Hauptcontainer für die Notiz (Funktionale Ebene) */
+        .note-container {
+            background-color: transparent;
+            max-width: 1000px;
+            min-width: 400px;
+            max-height: 400px;
+            min-height: 150px;
+            width: 780px; /* Standardbreite */
+            height: 220px; /* Standardhöhe */
+            box-sizing: border-box;
+            position: relative; 
+            z-index: 1000;
+        }
+        
+        /* Container für die Steuerelemente oben rechts */
+        .top-right-controls {
+            position: absolute;
+            top: -30px; 
+            right: 0;
+            display: flex;
+            gap: 8px; 
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out;
+            z-index: 1002;
+        }
+        
+        .note-container:hover .top-right-controls {
+            opacity: 1; 
+        }
+
+        /* Erstellt-von-Text unten links */
+        .creation-info {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            font-size: 11px;
+            font-style: italic;
+            color: #6b7280;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .note-container:hover .creation-info {
+            opacity: 1;
+        }
+        
+        /* Allgemeiner Stil für die oberen Icon-Buttons */
+        .top-icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .top-icon-button svg {
+            width: 16px;
+            height: 16px;
+            fill: #6b7280;
+            transition: fill 0.2s ease-in-out;
+        }
+        .top-icon-button:hover svg {
+            fill: #e5e7eb;
+        }
+
+        /* Visueller Container für alle Eingabefelder */
+        .input-group-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #1f2937;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); 
+        }
+        
+        .top-inputs-row {
+            display: flex;
+            border-bottom: 1px solid #4b5563;
+            flex-shrink: 0;
+        }
+        
+        .input-wrapper {
+            position: relative;
+            display: flex; 
+            width: 100%;
+        }
+        
+        #icon-container {
+            flex: 0 0 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+        }
+        #icon-container svg {
+            width: 18px;
+            height: 18px;
+            fill: #9ca3af;
+        }
+
+        #title-wrapper {
+            flex: 2 1 0; 
+        }
+        #purpose-wrapper {
+           flex: 5 1 0; 
+           border-left: 1px solid #4b5563;
+        }
+        #content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .styled-input {
+            width: 100%;
+            padding: 10px 12px; 
+            padding-right: 40px; 
+            background-color: transparent; 
+            border: none; 
+            color: #e5e7eb; 
+            font-size: 13px; 
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box; 
+            overflow: hidden;
+        }
+
+        #note-title, #note-purpose {
+            font-size: 13px; 
+            height: 36px; 
+        }
+        
+        .styled-input::placeholder { color: #9ca3af; }
+
+        .styled-input:focus {
+            outline: none;
+        }
+
+        textarea.styled-input {
+            resize: none;
+            flex-grow: 1;
+            height: 100%;
+            padding-bottom: 10px;
+            line-height: 1.5; 
+            font-weight: 300;
+            font-style: italic;
+            overflow: auto;
+            scrollbar-width: none;  /* Firefox */
+            transition: font-size 0.2s ease; /* Übergang für Schriftgröße */
+        }
+        
+        textarea.styled-input::-webkit-scrollbar {
+             display: none; /* Chrome, Safari, etc. */
+        }
+        
+        textarea.with-drop-zone {
+            padding-right: 115px; 
+        }
+        
+        .content-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 8px;
+            flex-shrink: 0;
+            border-top: 1px solid #4b5563;
+        }
+
+        .char-counter {
+            font-size: 10px;
+            color: #9ca3af;
+            opacity: 0; 
+            transition: opacity 0.2s ease-in-out;
+            pointer-events: none;
+        }
+        
+        .input-wrapper:focus-within .char-counter {
+            opacity: 0.6;
+        }
+
+        #title-wrapper .char-counter, #purpose-wrapper .char-counter {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+       
+        .icon-toolbar {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .icon-button {
+            background-color: transparent;
+            border: none;
+            padding: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .icon-button.active { background-color: rgba(236, 236, 236, 0.5); }
+        .icon-button.active svg { fill: #ececec; }
+        .icon-button svg {
+            width: 16px;
+            height: 16px;
+            fill: #9ca3af;
+            transition: fill 0.2s ease-in-out;
+        }
+        .icon-button:hover svg { fill: #ececec; }
+        
+        #drag-handle { cursor: grab; }
+
+        #drop-zone {
+            position: absolute;
+            right: 15px;
+            top: 15px; 
+            width: 90px; 
+            height: 90px;
+            border: 2px dashed #4b5563;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            cursor: pointer;
+            z-index: 15;
+        }
+        #drop-zone.visible { opacity: 1; visibility: visible; }
+        #drop-zone.dragover { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        #drop-zone svg { width: 32px; height: 32px; fill: #6b7280; }
+
+        .context-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #2d3748; 
+            border-radius: 6px;
+            padding: 4px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1010;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .context-menu.visible { opacity: 1; visibility: visible; }
+        .menu-button {
+            background: none;
+            border: none;
+            color: #e5e7eb;
+            padding: 6px 10px;
+            text-align: left;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 12px;
+        }
+        .menu-button:hover { background-color: #4a5568; }
+        .menu-separator { height: 1px; background-color: #4b5563; margin: 2px 0; }
+        
+        .resizer {
+            position: absolute;
+            background: transparent;
+            z-index: 1001;
+        }
+        .resizer-r { cursor: ew-resize; width: 7px; right: -3px; top: 0; height: 100%; }
+        .resizer-b { cursor: ns-resize; height: 7px; bottom: -3px; left: 0; width: 100%; }
+        .resizer-br { cursor: nwse-resize; width: 10px; height: 10px; right: -3px; bottom: -3px; }
+    </style>
+</head>
+<body>
+
+    <!-- Hauptcontainer für die Notiz -->
+    <div id="note-widget" class="note-container">
+        <div class="top-right-controls">
+             <button class="top-icon-button" title="Löschen">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1h4a1 1 0 110 2H4a1 1 0 110-2h4V3a1 1 0 011-1zM4 8h12v10a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"></path></svg>
+            </button>
+            <button class="top-icon-button" title="Speichern">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M17 2h-1.586a1 1 0 00-.707.293L13.293 3.707A1 1 0 0013 4.414V5a1 1 0 001 1h1v10H5V6h1a1 1 0 001-1V4.414a1 1 0 00-.293-.707L5.293 2.293A1 1 0 004.586 2H3a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2V4a2 2 0 00-2-2zM9 14a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1H9z"></path></svg>
+            </button>
+            <button class="top-icon-button" title="Senden">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+            </button>
+            <button id="close-note-btn" class="top-icon-button" title="Schliessen">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10 8.586L2.929 1.515 1.515 2.929 8.586 10l-7.071 7.071 1.414 1.414L10 11.414l7.071 7.071 1.414-1.414L11.414 10l7.071-7.071-1.414-1.414L10 8.586z"></path></svg>
+            </button>
+        </div>
+        
+        <div class="input-group-container">
+             <div class="top-inputs-row">
+                <!-- Icon -->
+                <div id="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                </div>
+
+                <!-- Titel Eingabefeld -->
+                <div id="title-wrapper" class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="note-title" 
+                        placeholder="Titel" 
+                        maxlength="30" 
+                        class="styled-input"
+                        spellcheck="false"
+                    >
+                    <span class="char-counter">30</span>
+                </div>
+
+                <!-- Zweck Eingabefeld -->
+                <div id="purpose-wrapper" class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="note-purpose" 
+                        placeholder="Nutzen" 
+                        maxlength="75"
+                        class="styled-input"
+                        spellcheck="false"
+                    >
+                    <span class="char-counter">75</span>
+                </div>
+             </div>
+
+            <!-- Inhaltsbereich -->
+            <div id="content-wrapper" class="input-wrapper">
+                <textarea 
+                    id="note-content" 
+                    placeholder="Inhalt" 
+                    maxlength="400"
+                    class="styled-input"
+                    spellcheck="false"
+                ></textarea>
+                <!-- Drop Zone für Bilder -->
+                <div id="drop-zone">
+                     <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 10.5V16.5H3.5V10.5L7.5 6.5L10.5 9.5L13.5 4.5L16.5 10.5ZM18 4C18 3.73478 17.8946 3.48043 17.7071 3.29289C17.5196 3.10536 17.2652 3 17 3H3C2.73478 3 2.48043 3.10536 2.29289 3.29289C2.10536 3.48043 2 3.73478 2 4V16C2 16.2652 2.10536 16.5196 2.29289 16.7071C2.48043 16.8946 2.73478 17 3 17H17C17.2652 17 17.5196 16.8946 17.7071 16.7071C17.8946 16.5196 18 16.2652 18 16V4ZM6 8C6.55228 8 7 7.55228 7 7C7 6.44772 6.55228 6 6 6C5.44772 6 5 6.44772 5 7C5 7.55228 5.44772 8 6 8Z"/></svg>
+                    <div id="drop-zone-menu" class="context-menu">
+                        <button id="upload-btn" class="menu-button">Hochladen</button>
+                        <div class="menu-separator"></div>
+                        <button id="screenshot-btn" class="menu-button">Screenshot</button>
+                    </div>
+                </div>
+                <div class="content-footer">
+                    <div class="icon-toolbar">
+                        <button id="drag-handle" class="icon-button" title="Verschieben">
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="#9ca3af" xmlns="http://www.w3.org/2000/svg"><path d="M5 4C4.44772 4 4 4.44772 4 5C4 5.55228 4.44772 6 5 6C5.55228 6 6 5.55228 6 5C6 4.44772 5.55228 4 5 4Z M5 10C4.44772 10 4 10.4477 4 11C4 11.5523 4.44772 12 5 12C5.55228 12 6 11.5523 6 11C6 10.4477 5.55228 10 5 10Z M11 4C10.4477 4 10 4.44772 10 5C10 5.55228 10.4477 6 11 6C11.5523 6 12 5.55228 12 5C12 4.44772 11.5523 4 11 4Z M11 10C10.4477 10 10 10.4477 10 11C10 11.5523 10.4477 12 11 12C11.5523 12 12 11.5523 12 11C12 10.4477 11.5523 10 11 10Z"/></svg>
+                        </button>
+                        <button id="toggle-drop-zone" class="icon-button" title="Bild hinzufügen">
+                            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 10.5V16.5H3.5V10.5L7.5 6.5L10.5 9.5L13.5 4.5L16.5 10.5ZM18 4C18 3.73478 17.8946 3.48043 17.7071 3.29289C17.5196 3.10536 17.2652 3 17 3H3C2.73478 3 2.48043 3.10536 2.29289 3.29289C2.10536 3.48043 2 3.73478 2 4V16C2 16.2652 2.10536 16.5196 2.29289 16.7071C2.48043 16.8946 2.73478 17 3 17H17C17.2652 17 17.5196 16.8946 17.7071 16.7071C17.8946 16.5196 18 16.2652 18 16V4ZM6 8C6.55228 8 7 7.55228 7 7C7 6.44772 6.55228 6 6 6C5.44772 6 5 6.44772 5 7C5 7.55228 5.44772 8 6 8Z"/></svg>
+                        </button>
+                        <button class="icon-button" title="Spracheingabe">
+                            <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 12C11.1046 12 12 11.1046 12 10V4C12 2.89543 11.1046 2 10 2C8.89543 2 8 2.89543 8 4V10C8 11.1046 8.89543 12 10 12ZM9 4C9 3.44772 9.44772 3 10 3C10.5523 3 11 3.44772 11 4V10C11 10.5523 10.5523 11 10 11C9.44772 11 9 10.5523 9 10V4Z M10 14C12.7614 14 15 11.7614 15 9H17C17 12.866 13.9624 16 10 16V18H7V16C3.03757 16 0 12.866 0 9H2C2 11.7614 4.23858 14 7 14H10Z"/></svg>
+                        </button>
+                        <button class="icon-button" title="Audio Visualizer">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M4 5h2v10H4V5zm4 3h2v7H8V8zm4-3h2v10h-2V5z"></path></svg>
+                        </button>
+                    </div>
+                    <span class="char-counter">400</span>
+                 </div>
+            </div>
+        </div>
+        <input type="file" id="file-upload-input" style="display: none;" accept="image/jpeg, image/png, image/bmp">
+        
+        <div class="resizer resizer-r"></div>
+        <div class="resizer resizer-b"></div>
+        <div class="resizer resizer-br"></div>
+        <span class="creation-info">Erstellt: CPR | 24.06.2025</span>
+    </div>
+
+    <script>
+        /**
+         * Initializes a character counter for a given input field.
+         */
+        function setupCharacterCounter(inputId) {
+            const inputElement = document.getElementById(inputId);
+            let counterElement;
+            if(inputId === 'note-content'){
+                 counterElement = inputElement.closest('#content-wrapper').querySelector('.content-footer .char-counter');
+            } else {
+                 counterElement = inputElement.closest('.input-wrapper').querySelector('.char-counter');
+            }
+            if (!inputElement || !counterElement) return;
+
+            const maxLength = inputElement.getAttribute('maxlength');
+            if (!maxLength) return;
+            
+            counterElement.textContent = maxLength;
+            inputElement.addEventListener('input', () => {
+                counterElement.textContent = maxLength - inputElement.value.length;
+            });
+        }
+        
+        /**
+         * Makes the note container draggable.
+         */
+        function makeDraggable() {
+            const noteWidget = document.getElementById('note-widget');
+            const dragHandle = document.getElementById('drag-handle');
+            
+            let isDragging = false;
+            let initialX, initialY, xOffset = 0, yOffset = 0;
+            
+            const rect = noteWidget.getBoundingClientRect();
+            noteWidget.style.position = 'absolute';
+            noteWidget.style.left = `${rect.left}px`;
+            noteWidget.style.top = `${rect.top}px`;
+            noteWidget.style.transform = '';
+
+            const dragStart = (e) => {
+                if (e.target.closest('#drag-handle')) {
+                    isDragging = true;
+                    xOffset = e.clientX - noteWidget.offsetLeft;
+                    yOffset = e.clientY - noteWidget.offsetTop;
+                    document.body.style.cursor = 'grabbing';
+                }
+            };
+
+            const dragEnd = () => {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+            };
+
+            const drag = (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    noteWidget.style.left = `${e.clientX - xOffset}px`;
+                    noteWidget.style.top = `${e.clientY - yOffset}px`;
+                }
+            };
+
+            dragHandle.addEventListener('mousedown', dragStart);
+            document.addEventListener('mouseup', dragEnd);
+            document.addEventListener('mousemove', drag);
+        }
+
+        /**
+         * Sets up the drag and drop functionality.
+         */
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            const dropZoneMenu = document.getElementById('drop-zone-menu');
+            const toggleButton = document.getElementById('toggle-drop-zone');
+            const noteContent = document.getElementById('note-content');
+            const fileUploadInput = document.getElementById('file-upload-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const screenshotBtn = document.getElementById('screenshot-btn');
+            const allowedFileTypes = ['image/jpeg', 'image/png', 'image/bmp'];
+
+            toggleButton.addEventListener('click', () => {
+                dropZone.classList.toggle('visible');
+                toggleButton.classList.toggle('active');
+                noteContent.classList.toggle('with-drop-zone');
+                if (!dropZone.classList.contains('visible')) {
+                    dropZoneMenu.classList.remove('visible');
+                }
+            });
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                let dt = e.dataTransfer;
+                let files = dt.files;
+                handleFiles(files);
+            }, false);
+
+            dropZone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropZoneMenu.classList.toggle('visible');
+            });
+
+            uploadBtn.addEventListener('click', (e) => {
+                 e.stopPropagation();
+                fileUploadInput.click();
+                dropZoneMenu.classList.remove('visible');
+            });
+            
+            fileUploadInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files);
+            });
+            
+            screenshotBtn.addEventListener('click', (e) => {
+                 e.stopPropagation();
+                console.log('Screenshot-Funktionalität hier implementieren.');
+                alert('Screenshot-Funktion ist noch nicht implementiert.');
+                dropZoneMenu.classList.remove('visible');
+            });
+
+            function handleFiles(files) {
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (allowedFileTypes.includes(file.type)) {
+                        console.log('Akzeptierte Datei:', file.name, file.type);
+                    } else {
+                        console.log('Ungültiger Dateityp:', file.type);
+                        alert('Ungültiger Dateityp. Bitte nur JPEG, PNG oder BMP verwenden.');
+                    }
+                }
+            }
+            
+            window.addEventListener('click', (e) => {
+                if (!dropZone.contains(e.target)) {
+                    dropZoneMenu.classList.remove('visible');
+                }
+            });
+        }
+        
+        /**
+         * Sets up the close button functionality.
+         */
+        function setupCloseButton() {
+            const closeBtn = document.getElementById('close-note-btn');
+            const noteWidget = document.getElementById('note-widget');
+            
+            closeBtn.addEventListener('click', () => {
+                noteWidget.style.display = 'none';
+            });
+        }
+
+        /**
+         * Makes the note container resizable.
+         */
+        function makeResizable() {
+            const note = document.getElementById('note-widget');
+            const noteContent = document.getElementById('note-content');
+            const resizers = note.querySelectorAll('.resizer');
+
+            let original_width = 0;
+            let original_height = 0;
+            let original_mouse_x = 0;
+            let original_mouse_y = 0;
+
+            const updateContentFontSize = (currentWidth) => {
+                if (currentWidth <= 500) {
+                    noteContent.style.fontSize = '12px';
+                } else if (currentWidth > 500 && currentWidth <= 850) {
+                    noteContent.style.fontSize = '14px';
+                } else if (currentWidth > 850 && currentWidth <= 950) {
+                     noteContent.style.fontSize = '18px';
+                } else if (currentWidth > 950){
+                    noteContent.style.fontSize = '28px';
+                }
+            };
+
+            for (let i = 0; i < resizers.length; i++) {
+                const currentResizer = resizers[i];
+
+                currentResizer.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    original_width = parseFloat(getComputedStyle(note, null).getPropertyValue('width').replace('px', ''));
+                    original_height = parseFloat(getComputedStyle(note, null).getPropertyValue('height').replace('px', ''));
+                    original_mouse_x = e.clientX;
+                    original_mouse_y = e.clientY;
+                    window.addEventListener('mousemove', resize);
+                    window.addEventListener('mouseup', stopResize);
+                });
+
+                function resize(e) {
+                    let width = original_width;
+                    let height = original_height;
+
+                    if (currentResizer.classList.contains('resizer-r') || currentResizer.classList.contains('resizer-br')) {
+                        width = original_width + (e.clientX - original_mouse_x);
+                    }
+                     if (currentResizer.classList.contains('resizer-b') || currentResizer.classList.contains('resizer-br')) {
+                        height = original_height + (e.clientY - original_mouse_y);
+                    }
+                    
+                    if (width >= 400 && width <= 1000) {
+                        note.style.width = width + 'px';
+                    }
+                     if (height >= 200 && height <= 600) {
+                        note.style.height = height + 'px';
+                    }
+                    
+                    updateContentFontSize(parseFloat(note.style.width));
+                }
+
+                function stopResize() {
+                    window.removeEventListener('mousemove', resize);
+                }
+            }
+             // Set initial font size
+            updateContentFontSize(parseFloat(getComputedStyle(note, null).getPropertyValue('width').replace('px', '')));
+        }
+
+        window.addEventListener('load', () => {
+            setupCharacterCounter('note-title');
+            setupCharacterCounter('note-purpose');
+            setupCharacterCounter('note-content');
+            makeDraggable();
+            setupDragAndDrop();
+            setupCloseButton();
+            makeResizable();
+        });
+    </script>
+
+</body>
+</html>
+

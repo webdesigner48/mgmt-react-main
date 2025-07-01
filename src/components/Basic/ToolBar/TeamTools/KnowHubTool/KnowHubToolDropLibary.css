@@ -1,0 +1,302 @@
+.knowhub-tool-drop-library-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(14, 16, 28, 0.99);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.knowhub-tool-drop-library-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background-color: rgba(46, 52, 64, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  width: 45px;
+  height: 100vh;
+  overflow: hidden;
+  border: 1px solid rgba(236, 236, 236, 0.1);
+  animation: slideInFromLeft 0.3s ease-out;
+  transition: width ease 0.5s, box-shadow 0.4s ease, Background-color 0.4s ease;
+}
+
+.knowhub-tool-drop-library-container:hover,
+.knowhub-tool-drop-library-container.pinned {
+  background-color: rgba(46, 52, 64, 0.95);
+  box-shadow: 2px 10px 36px 0 rgba(0, 0, 0, 0.7);
+  width: 250px;
+}
+
+.knowhub-tool-drop-library-container.pinned .menu-item-drop,
+.knowhub-tool-drop-library-container:hover .menu-item-drop {
+  width: 55px;
+  height: 55px;
+  opacity: 1;
+}
+
+.knowhub-tool-drop-library-container.pinned .drop-content-item,
+.knowhub-tool-drop-library-container:hover .drop-content-item {
+  margin-bottom: 6px;
+}
+
+.knowhub-tool-drop-library-container.pinned .knowhub-burger-menu-icon,
+.knowhub-tool-drop-library-container:hover .knowhub-burger-menu-icon {
+  opacity: 0;
+}
+
+.knowhub-tool-drop-library-container.pinned .knowhub-search-container,
+.knowhub-tool-drop-library-container:hover .knowhub-search-container {
+  opacity: 1;
+}
+
+.knowhub-tool-drop-library-container.pinned .knowhub-pin-container,
+.knowhub-tool-drop-library-container:hover .knowhub-pin-container {
+  opacity: 1;
+}
+
+.knowhub-pin-container.active {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+  background: rgba(175, 179, 185, 0.4);
+}
+
+.knowhub-tool-drop-library-platform {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.knowhub-tool-drop-library-container.closing {
+  animation: slideOutToLeft 0.3s ease-out forwards;
+}
+
+.knowhub-tool-drop-library-close-button {
+  background: transparent;
+  border: none;
+  color: #ececec;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.knowhub-tool-drop-library-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.knowhub-tool-drop-library-close-button svg {
+  fill: currentColor;
+}
+
+.knowhub-tool-drop-library-container {
+  position: absolute;
+  left: 0;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.drop-content-item{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  position: relative;
+  height: 37px;
+  width: 250px;
+  padding-left: 2px;
+  background: #ececec00;
+  transition: background-color ease 0.4s,width ease 0.4s, border-bottom ease 0.4s, margin-bottom ease 0.4s;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.0);
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+
+.drop-content-item:active {
+  cursor: grabbing;
+}
+
+.drop-content-item:hover{
+  background: #ececec4f;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.1);
+}
+
+.menu-item-drop {
+  width: 50px;
+  height: 50px;
+  transform: translateX(-5px);
+  opacity: 0.6;
+  transition: width ease 0.4s, height ease 0.4s, opacity ease 0.4s;
+}
+
+.knowhub-tool-drop-library-container:hover .menu-item-drop {
+  width: 55px;
+  height: 55px;
+  opacity: 1;
+}
+
+.knowhub-tool-drop-library-container:hover .drop-content-item {
+  margin-bottom: 6px;
+}
+
+.drop-content-item p {
+  user-select: none; /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.knowhub-burger-menu-icon {
+  position: relative;
+  top: 10px;
+  left: 10px;
+  opacity: 1;
+  transition: opacity 0.4s ease-in-out;
+  margin-bottom: 20px;
+  opacity: 0.6;
+  padding-left: 2px;
+}
+
+.knowhub-tool-drop-library-container:hover .knowhub-burger-menu-icon {
+  opacity: 0;
+}
+
+.knowhub-top-section {
+  position: relative;
+  height: 50px; /* Adjust as needed */
+}
+
+.knowhub-search-container,
+.knowhub-burger-menu-icon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.knowhub-burger-menu-icon {
+  margin-top: 5px;
+  transition: opacity 0.4s ease-in-out;
+  opacity: 0.6;
+}
+
+.knowhub-search-container {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  z-index: 2; /* Ensure search is on top */
+}
+
+.knowhub-tool-drop-library-container:hover .knowhub-search-container {
+  opacity: 1;
+}
+
+.knowhub-tool-drop-library-container:hover .knowhub-pin-container {
+  opacity: 1;
+}
+
+.knowhub-search-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  color: #ececec;
+  padding-left: 30px; /* Space for the icon */
+  width: 150px; /* Adjust width as needed */
+  outline: none;
+  height: 30px;
+}
+
+.knowhub-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  fill: #ececec;
+  width: 13px;
+  height: 13px;
+}
+
+.dropContainer{
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.1);
+  border-top: 1px solid rgba(236, 236, 236, 0.1);
+  width: 250px;
+  height: calc(90vh - 40px);
+  overflow: hidden;
+  padding-bottom: 20px;
+  padding-top: 20px;
+}
+
+.knowhub-pin-container {
+  position: absolute;
+  top: 12px;
+  margin-right: 10px;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+  background: rgba(175, 179, 185, 0.2);
+  cursor: pointer;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out, background 0.4s ease;
+  z-index: 2; /* Ensure search is on top */
+  height: 30px;
+  width: 30px;
+  right: 2px;
+}
+
+.knowhub-pin-container:hover {
+  background: rgba(175, 179, 185, 0.5);
+}
+
+.knowhub-pin-icon {
+  position: absolute;
+  left: 10px;
+  top: 25%;
+  transform: translateY(50%);
+  fill: #ececec;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+  transform: translateX(-2px);
+}
+
+.knowhub-tool-drop-library-container:hover .knowhub-pin-container {
+  opacity: 1;
+}

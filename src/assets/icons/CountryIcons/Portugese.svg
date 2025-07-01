@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske -->
+  <defs>
+    <clipPath id="circle-clip-portugal">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-portugal)">
+    
+    <!-- Grüne vertikale Bande (links) -->
+    <rect width="40" height="100" x="0" y="0" style="fill:#006600;"/>
+    <!-- Rote vertikale Bande (rechts) -->
+    <rect width="60" height="100" x="40" y="0" style="fill:#FF0000;"/>
+
+    <!-- Wappen (vereinfacht) -->
+    <g transform="translate(40, 50)">
+      <!-- Armillarsphäre (gold) -->
+      <circle cx="0" cy="0" r="18" style="fill:#FFC72C;"/>
+      <circle cx="0" cy="0" r="14" style="fill:none; stroke:#000000; stroke-width:2;"/>
+      
+      <!-- Schild (rot und weiss) -->
+      <g>
+        <!-- Roter Rand mit Burgen -->
+        <circle cx="0" cy="0" r="12" style="fill:#FF0000;"/>
+        <g style="fill:#FFC72C;">
+          <circle cx="0" cy="-9" r="1.5"/>
+          <circle cx="0" cy="9" r="1.5"/>
+          <circle cx="7" cy="-5" r="1.5"/>
+          <circle cx="-7" cy="-5" r="1.5"/>
+           <circle cx="7" cy="5" r="1.5"/>
+          <circle cx="-7" cy="5" r="1.5"/>
+        </g>
+        
+        <!-- Weisser innerer Schild -->
+        <circle cx="0" cy="0" r="8" style="fill:#FFFFFF;"/>
+
+        <!-- Fünf blaue Schilde (Quinas) -->
+        <g style="fill:#003399">
+            <circle cx="0" cy="0" r="2.5"/>
+            <circle cx="0" cy="-4.5" r="1.8"/>
+            <circle cx="0" cy="4.5" r="1.8"/>
+            <circle cx="-4" cy="0" r="1.8"/>
+            <circle cx="4" cy="0" r="1.8"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     height="44" width="44" viewBox="0 0 512 512"
+     style="filter: drop-shadow(0 2px 8px rgba(30,43,60,0.25));">
+  <g transform="translate(26 3)">
+    <path 
+      d="M320,168V104a40,40,0,0,0-40-40H88a40,40,0,0,0-40,40V408a40,40,0,0,0,40,40H280a40,40,0,0,0,40-40V344" 
+      style="fill: none; stroke: #ececec; stroke-linecap: round; stroke-linejoin: round; stroke-width: 32;"
+    />
+    <polyline 
+      points="384 176 464 256 384 336" 
+      style="fill: none; stroke: #c68c10; stroke-linecap: round; stroke-linejoin: round; stroke-width: 32;"
+    />
+    <line 
+      x1="191" 
+      y1="256" 
+      x2="464" 
+      y2="256" 
+      style="fill: none; stroke: #c68c10; stroke-linecap: round; stroke-linejoin: round; stroke-width: 32;"
+    />
+  </g>
+</svg>

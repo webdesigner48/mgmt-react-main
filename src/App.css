@@ -1,0 +1,39 @@
+.App {
+  display: flex; /* Arranges Sidebar and main-content side-by-side */
+  height: 100vh; /* Ensures the app fills the entire viewport height */
+  /* The overall background color was likely set on 'body' in index.css */
+  overflow: hidden; /* Prevent .App container from scrolling */
+}
+
+.main-content {
+  flex-grow: 1; /* Allows this div to take up the remaining horizontal space */
+  display: flex; /* To allow the child view to potentially fill this container */
+  flex-direction: column; /* Stacks children vertically, common for views */
+  /* overflow-y: auto; */ /* Remove this or set to hidden if views manage their own scroll */
+  overflow: hidden; /* Prevent .main-content itself from showing scrollbars */
+  position: relative; /* Useful if child elements inside views need absolute positioning relative to the view container */
+}
+
+/* 
+  This rule helps the component rendered inside .main-content 
+  (e.g., MainChat, UnternehmenView) to fill the .main-content area.
+  You might need to adjust this based on how your views are structured.
+*/
+.main-content > * {
+  flex-grow: 1; /* Makes the view itself expand */
+  display: flex; /* If the view itself uses flexbox for its internal layout */
+  flex-direction: column; /* Common for views to stack their own content */
+  align-items: center;
+}
+
+/* General view container - might not need specific fade-in if components handle it */
+/*
+.view-container-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+*/

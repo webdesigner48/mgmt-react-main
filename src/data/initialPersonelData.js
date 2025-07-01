@@ -1,0 +1,26 @@
+// data/initialPersonelData.js
+export const initialPersonelData = [
+  { id: '1', vorname: 'Max', nachname: 'Mustermann', kapazitaet: '100%', abteilung: 'IT', email: 'max.mustermann@example.com', rolle: 'User', aktion: '' },
+  { id: '2', vorname: 'Maria', nachname: 'Musterfrau', kapazitaet: '80%', abteilung: 'HR', email: 'maria.musterfrau@example.com', rolle: 'Admin', aktion: '' },
+  { id: '3', vorname: 'Peter', nachname: 'Pan', kapazitaet: '50%', abteilung: 'Geschäftsführung', email: 'peter.pan@example.com', rolle: 'User', aktion: '' },
+  { id: '4', vorname: 'Laura', nachname: 'Schmidt', kapazitaet: '90%', abteilung: 'IT', email: 'laura.schmidt@example.com', rolle: 'Leader', aktion: '' },
+  { id: '5', vorname: 'Kevin', nachname: 'Müller', kapazitaet: '70%', abteilung: 'Finanzen', email: 'kevin.mueller@example.com', rolle: 'User', aktion: '' },
+  { id: '6', vorname: 'Julia', nachname: 'Weber', kapazitaet: '100%', abteilung: 'HR', email: 'julia.weber@example.com', rolle: 'Management', aktion: '' },
+  { id: '7', vorname: 'Tom', nachname: 'Klein', kapazitaet: '60%', abteilung: 'IT', email: 'tom.klein@example.com', rolle: 'User', aktion: '' },
+  { id: '8', vorname: 'Anna', nachname: 'Groß', kapazitaet: '85%', abteilung: 'Geschäftsführung', email: 'anna.gross@example.com', rolle: 'Leader', aktion: '' },
+  { id: '9', vorname: 'Michael', nachname: 'Bauer', kapazitaet: '95%', abteilung: 'Finanzen', email: 'michael.bauer@example.com', rolle: 'User', aktion: '' },
+  { id: '10', vorname: 'Sophie', nachname: 'Richter', kapazitaet: '75%', abteilung: 'IT', email: 'sophie.richter@example.com', rolle: 'Admin', aktion: '' },
+  { id: '11', vorname: 'David', nachname: 'Wolf', kapazitaet: '55%', abteilung: 'HR', email: 'david.wolf@example.com', rolle: 'User', aktion: '' },
+  { id: '12', vorname: 'Lena', nachname: 'Neumann', kapazitaet: '65%', abteilung: 'Geschäftsführung', email: 'lena.neumann@example.com', rolle: 'Management', aktion: '' },
+  { id: '13', vorname: 'Felix', nachname: 'Schwarz', kapazitaet: '80%', abteilung: 'IT', email: 'felix.schwarz@example.com', rolle: 'Leader', aktion: '' },
+  { id: '14', vorname: 'Hannah', nachname: 'Zimmermann', kapazitaet: '90%', abteilung: 'Finanzen', email: 'hannah.zimmermann@example.com', rolle: 'User', aktion: '' },
+  { id: '15', vorname: 'Lukas', nachname: 'Braun', kapazitaet: '70%', abteilung: 'HR', email: 'lukas.braun@example.com', rolle: 'Admin', aktion: '' },
+  { id: '16', vorname: 'Mia', nachname: 'Krüger', kapazitaet: '100%', abteilung: 'IT', email: 'mia.krueger@example.com', rolle: 'User', aktion: '' },
+  { id: '17', vorname: 'Leon', nachname: 'Hartmann', kapazitaet: '60%', abteilung: 'Geschäftsführung', email: 'leon.hartmann@example.com', rolle: 'Leader', aktion: '' },
+  { id: '18', vorname: 'Emilia', nachname: 'Lange', kapazitaet: '85%', abteilung: 'Finanzen', email: 'emilia.lange@example.com', rolle: 'Management', aktion: '' },
+  { id: '19', vorname: 'Noah', nachname: 'Werner', kapazitaet: '95%', abteilung: 'IT', email: 'noah.werner@example.com', rolle: 'User', aktion: '' },
+  { id: '20', vorname: 'Lina', nachname: 'Schulz', kapazitaet: '75%', abteilung: 'HR', email: 'lina.schulz@example.com', rolle: 'Admin', aktion: '' },
+  { id: '21', vorname: 'Paul', nachname: 'Meier', kapazitaet: '55%', abteilung: 'Geschäftsführung', email: 'paul.meier@example.com', rolle: 'User', aktion: '' },
+  { id: '22', vorname: 'Clara', nachname: 'Hofmann', kapazitaet: '65%', abteilung: 'IT', email: 'clara.hofmann@example.com', rolle: 'Leader', aktion: '' },
+  { id: '23', vorname: 'Ben', nachname: 'Walter', kapazitaet: '80%', abteilung: 'Finanzen', email: 'ben.walter@example.com', rolle: 'Management', aktion: '' }
+];

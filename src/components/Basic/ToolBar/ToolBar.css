@@ -1,0 +1,419 @@
+/* Toolbar styles - similar to Sidebar but aligned right */
+.toolbar {
+  position: fixed;
+  right: 0; /* Align to the right */
+  top: 0;
+  bottom: 0;
+  background-color: transparent; /* Default to transparent */
+  z-index: 1000;
+  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  overflow: visible; /* Allow tooltips to extend beyond bounds */
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  padding-left: 25px; /* Added left padding */
+  padding-right: 25px; /* Added right padding */
+  box-sizing: border-box;
+  width: 84px; /* Initial collapsed width */
+}
+
+.toolbar.expanded {
+  width: 250px; 
+  background-color: #2a2f3a; 
+}
+
+/* Styles for narrow screens */
+@media (max-width: 770px) {
+
+  .toolbar.expanded {
+    width: 250px !important; /* Ensure expanded width on narrow screens, further reduced by 50px */
+    background-color: #2a2f3a !important; /* Ensure background is visible when expanded */
+  }
+}
+
+.toolbar-top-fixed-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%; 
+  align-items: stretch; 
+}
+
+/* New wrapper for top buttons (fullscreen and grid) */
+.toolbar-controls-row {
+  display: flex;
+  justify-content: flex-start; /* MODIFIED: Align items to the start */
+  align-items: center;
+  width: 100%;
+  margin-bottom: 40px; /* Same as grid-icon-wrapper original margin-bottom */
+  position: relative; /* ADDED: To anchor the absolute grid-icon-wrapper */
+}
+
+/* Styles for the fullscreen button */
+.fullscreen-button-wrapper {
+  position: relative; /* For tooltip positioning */
+  display: flex;
+  align-items: center;
+  opacity: 0; /* Hidden when toolbar is collapsed */
+  visibility: hidden; /* Does not occupy space when hidden initially, but width will handle layout */
+  width: 0; /* Make it take no space when collapsed */
+  /* overflow: hidden; */ /* REMOVED: This was clipping the tooltip */
+  /* Hide after opacity and width transition, width transition added */
+  transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out, visibility 0s linear 0.2s;
+}
+
+.toolbar.expanded .fullscreen-button-wrapper {
+  opacity: 1; 
+  visibility: visible;
+  width: 40px; 
+  transition: opacity 0.2s ease-in-out, width 0.2s ease-in-out, visibility 0s linear 0s;
+}
+
+.toolbar-action-button svg {
+  width: 20px;
+  height: 20px;
+  fill: #ececec;
+}
+
+.fullscreen-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 9px; /* Slightly less padding to make icon appear similar size to grid icon */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  color: #ececec; /* Icon color */
+  transition: background-color 0.2s ease-in-out, opacity 0.3s ease;
+}
+
+.fullscreen-button svg {
+  fill: currentColor;
+}
+
+.fullscreen-button:hover {
+  background-color: #3b4252;
+  opacity: 0.7;
+}
+
+.fullscreen-button.active {
+  background-color: #3b4252; /* Indicate active state */
+  opacity: 0.7;
+}
+
+.fullscreen-button:active,
+.fullscreen-button.active:active {
+  opacity: 1 !important;
+  transition: opacity 0.05s ease;
+}
+
+.fullscreen-button-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute; /* Changed from fixed to absolute */
+  top: 50%; /* Center vertically relative to the button wrapper */
+  right: calc(100% + 10px); /* Position to the left of the button wrapper */
+  transform: translateY(-50%) scale(0.5); /* Adjust transform for vertical centering and initial scale */
+  background-color: #ecececc4;
+  color: #333842;
+  padding: 2px 6px; /* Consistent padding */
+  border-radius: 5px;
+  font-size: 0.88em;
+  white-space: nowrap;
+  z-index: 1001;
+  transform-origin: right center; /* Scale from the right center */
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0s linear 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Text inside tooltip aligns left */
+  pointer-events: none;
+}
+
+.fullscreen-button-wrapper:hover .fullscreen-button-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateY(-50%) scale(1); /* Grow to full size on hover, maintaining vertical center */
+  transition: opacity 0.2s ease-in-out 0s, 
+              transform 0.2s ease-in-out 0s, 
+              visibility 0s linear 0s;
+}
+
+
+/* Grid icon styles - similar to burger menu */
+.grid-icon-wrapper {
+  position: absolute; /* MODIFIED: For fixed positioning within parent */
+  right: 0; /* ADDED: Pin to the right */
+  top: 50%; /* ADDED: For vertical centering */
+  transform: translateY(-50%); /* ADDED: For vertical centering */
+  display: flex;
+  align-items: center;
+  /* margin-bottom: 40px; */ /* Moved to toolbar-controls-row */
+  padding-right: 0px; /* Adjusted for right alignment */
+  box-sizing: border-box;
+  /* justify-content: flex-end; */ /* REMOVED: No longer needed */
+  /* margin-left: auto; */ /* Already removed */
+}
+
+.grid-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 11px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease-in-out, opacity 0.3s ease;
+}
+
+.grid-icon-button svg {
+  fill: #ececec;
+}
+
+.grid-icon-button:hover {
+  background-color: #3b4252;
+  opacity: 0.7;
+}
+
+.grid-icon-button.expanded {
+  background-color: #3b4252;
+  opacity: 0.7;
+}
+
+.grid-icon-button:active,
+.grid-icon-button.expanded:active {
+  opacity: 1 !important;
+  transition: opacity 0.05s ease;
+}
+
+/* Tooltip styles - similar to burger tooltip */
+.grid-hover-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: fixed;
+  top: 65px; /* Adjusted: 20px (toolbar padding-top) + 40px (button height) + 5px (gap) */
+  right: 12px; /* Adjusted for right alignment */
+  background-color: #ecececc4;
+  color: #333842;
+  padding: 2px;
+  border-radius: 5px;
+  font-size: 0.88em;
+  white-space: nowrap;
+  z-index: 1001;
+  transform: scale(0.5);
+  transform-origin: top right; /* Scale from the top-right corner */
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, visibility 0s linear 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end; /* Align content to the right */
+  pointer-events: none;
+}
+
+/* Show tooltip when grid icon button is hovered */
+.grid-icon-button:hover + .grid-hover-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: scale(1); /* Grow to full size on hover */
+  transition: opacity 0.2s ease-in-out 0s, 
+              transform 0.2s ease-in-out 0s, 
+              visibility 0s linear 0s;
+}
+
+.toolbar-decorative-rectangle {
+  display: flex;
+  flex-direction: column;
+  width: 100%; 
+  border-top: 1px solid #ececec56;
+  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  margin-top: 8px; 
+  align-items: flex-start;
+}
+
+.toolbar-section-heading {
+  color: #ecececc7;
+  font-size: 0.9em; 
+  font-weight: 400;
+  text-align: left; 
+  width: 100%;
+  margin-bottom: 0px; 
+  margin-top: 15px;;
+  padding-left: 5px; 
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  visibility: visible; 
+}
+
+.toolbar.expanded .toolbar-section-heading {
+  opacity: 1;
+}
+
+
+.toolbar-decorative-rectangle:not(.personal-rectangle):not(.admin-rectangle) > .toolbar-actions-row:first-child {
+  padding-bottom: 0px; 
+  margin-bottom: 5px; 
+  box-sizing: border-box; 
+}
+
+.toolbar.expanded .toolbar-decorative-rectangle {
+  opacity: 1;
+}
+
+.toolbar-decorative-rectangle.admin-rectangle .toolbar-actions-row {
+  justify-content: space-around; /* Distribute icons evenly, like Abteilung */
+  padding: 5px; 
+}
+
+.toolbar-decorative-rectangle.personal-rectangle .toolbar-actions-row {
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.toolbar-decorative-rectangle.personal-rectangle .toolbar-action-item {
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: calc(33.333% - 10px);
+  margin: 5px; 
+}
+
+.toolbar-actions-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out 0.1s;
+  padding: 2px 5px; /* Add some padding so icons are not at the very edge */
+  box-sizing: border-box;
+}
+
+.toolbar.expanded .toolbar-actions-row {
+  opacity: 1;
+}
+
+.toolbar-action-item {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.toolbar-action-button {
+  background-color: transparent;
+  border: none;
+  border-radius: 4px;
+  padding-left: 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; 
+  color: #ececece5;
+  transition: background-color 0.2s ease-in-out;
+  width: 100%; 
+  height: 32px;
+}
+
+.toolbar-action-button svg {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  min-width: 20px;
+  fill: currentColor;
+}
+
+.toolbar-action-button-text {
+  opacity: 0;
+  visibility: hidden;
+  margin-left: 15px; /* Space between icon and text */
+  color: #ecececee;
+  font-size: 0.91em;
+  white-space: nowrap; /* Prevent text from wrapping */
+  transition: opacity 0.2s ease-in-out, visibility 0s linear 0.2s;
+}
+
+.toolbar.expanded .toolbar-action-button-text {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s ease-in-out 0.1s, visibility 0s linear 0.1s; /* Fade in with a slight delay */
+}
+
+.toolbar-action-button:hover {
+  background-color: #434a59; /* Slightly lighter than toolbar background */
+}
+
+/* Tooltip for action buttons */
+.toolbar-action-tooltip {
+  position: absolute;
+  bottom: 100%; /* Position above the button */
+  left: 50%;
+  /* transform: translateX(-50%); */ /* Will be combined with scale */
+  transform: translateX(-50%) scale(0.5); /* Initial size and centered */
+  transform-origin: bottom center; /* Scale from the bottom center */
+  margin-bottom: 8px; /* Space between button and tooltip */
+  background-color: #ecececc4; /* Match sidebar tooltip background */
+  color: #333842; /* Match sidebar tooltip text color */
+  padding: 2px 6px; /* Match sidebar tooltip padding (approximated) */
+  border-radius: 5px;
+  font-size: 0.88em; /* Match sidebar tooltip font size */
+  white-space: nowrap;
+  z-index: 1050; 
+  visibility: hidden;
+  opacity: 0;
+  /* Match sidebar tooltip transition */
+  transition: opacity 0.2s ease-in-out, 
+              transform 0.2s ease-in-out, 
+              visibility 0s linear 0.2s;
+  pointer-events: none;
+}
+
+.toolbar-action-item:hover .toolbar-action-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) scale(1); /* Grow to full size on hover */
+  /* Match sidebar tooltip transition for appearing */
+  transition: opacity 0.2s ease-in-out 0s, 
+              transform 0.2s ease-in-out 0s, 
+              visibility 0s linear 0s;
+}
+
+.tooltip-text-container {
+  background-color: #ececec00;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-align: right; /* Align text to the right */
+}
+
+.toolbar-content {
+  color: #ececec;
+  padding: 0 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out 0.1s;
+  text-align: right; /* Align content to the right */
+}
+
+.toolbar.expanded .toolbar-content {
+  opacity: 1;
+}
+
+.toolbar-top-fixed-area {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toolbar-hover-expand-trigger-area {
+  flex-grow: 1;
+  width: 100%;
+}

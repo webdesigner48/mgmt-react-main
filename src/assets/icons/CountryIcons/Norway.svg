@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske -->
+  <defs>
+    <clipPath id="circle-clip-norway">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-norway)">
+    
+    <!-- Roter Hintergrund -->
+    <rect width="100" height="100" style="fill:#EF2B2D;"/>
+
+    <!-- Weisses skandinavisches Kreuz -->
+    <g style="fill:#FFFFFF;">
+        <!-- Horizontaler Balken -->
+        <rect width="100" height="20" y="40"/>
+        <!-- Vertikaler Balken -->
+        <rect width="20" height="100" x="30"/>
+    </g>
+
+    <!-- Blaues skandinavisches Kreuz -->
+    <g style="fill:#002868;">
+        <!-- Horizontaler Balken -->
+        <rect width="100" height="12" y="44"/>
+        <!-- Vertikaler Balken -->
+        <rect width="12" height="100" x="34"/>
+    </g>
+
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

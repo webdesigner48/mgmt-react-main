@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" xml:space="preserve">
+    <defs>
+        <!-- Shadow Filter Definition -->
+        <filter id="shadow" x="-50%" y="-50%" width="496.158" height="496.158">
+            <feDropShadow dx="4" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity="0.3"/>
+        </filter>
+        
+        <style>
+            .file-body { fill:rgb(203, 235, 253); }
+            .file-corner { fill: #c1d1da; }
+            .file-lines { fill: #4d5c7d; }
+            .badge-main { fill: #4e748b; }
+            .badge-shadow-right { fill: #6198ba; }
+            .badge-shadow-top { fill: #4c81a1; }
+            .badge-highlight { fill: #4c81a1; }
+        </style>
+    </defs>
+    
+    <g fill-rule="evenodd" filter="url(#shadow)" clip-rule="evenodd">
+        <!-- Main file body (without shadow) -->
+        <path class="file-body" d="M446.035 501H65.964c-6.61 0-12-5.391-12-12V135.792c0-3.305 1.178-6.148 3.516-8.485L170.27 14.514c2.337-2.336 5.181-3.514 8.484-3.514h267.281c6.61 0 12 5.391 12 12v466c0 6.609-5.389 12-12 12z"/>
+        <path class="file-corner" d="M170.27 14.514 57.479 127.307c-1.068 1.067-1.894 2.24-2.476 3.515h97.914c11.493 0 20.865-9.372 20.865-20.866V12.039c-1.273.582-2.446 1.408-3.512 2.475z"/>
+        <g class="file-lines">
+            <path d="M109 445.643c-4.972 0-9-4.029-9-9s4.028-9 9-9h294.002c4.972 0 9 4.029 9 9s-4.028 9-9 9zm0-246.58a9 9 0 0 1-9-9c0-4.971 4.028-9 9-9h74.785c4.974 0 9 4.029 9 9 0 4.97-4.026 9-9 9zm0 49.315a9 9 0 0 1-9-9c0-4.971 4.028-9 9-9h109.785c4.974 0 9 4.029 9 9 0 4.97-4.026 9-9 9zm0 49.315c-4.972 0-9-4.029-9-9s4.028-9 9-9h294.002c4.972 0 9 4.029 9 9s-4.028 9-9 9zm0 49.317c-4.972 0-9-4.029-9-9s4.028-9 9-9h294.002c4.972 0 9 4.029 9 9s-4.028 9-9 9zm0 49.316c-4.972 0-9-4.029-9-9s4.028-9 9-9h294.002c4.972 0 9 4.029 9 9s-4.028 9-9 9z"/>
+        </g>
+        
+        <!-- Group for the badge, with the shadow filter applied -->
+        <g>
+            <path class="badge-main" d="m316.094 58.496 94 36.549v108.542l-94 36.55-93.999-36.55V95.045z"/>
+            <path class="badge-shadow-right" d="m316.094 58.496 94 36.549v108.542l-94 36.55z"/>
+            <path class="badge-shadow-top" d="m316.094 58.496 94 36.549-94 36.55-93.999-36.55z"/>
+            <path class="badge-highlight" d="M284.978 119.495v27.554l-31.766-10.838v-29.066c31.334-12.184 62.665-24.369 94-36.551l31.766 12.352-94 36.549z"/>
+        </g>
+    </g>
+</svg>

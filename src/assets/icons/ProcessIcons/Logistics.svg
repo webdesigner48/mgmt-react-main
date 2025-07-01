@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" height="44" width="44" viewBox="0 0 24 24" style="filter: drop-shadow(0 2px 8px rgba(30,43,60,0.25));">
+  <path style="fill:#ececec;" d="m4 2-2 5h20l-2-5h-4-8z"/>
+  <path style="fill:#3cc799;" d="m9 7h6l-1-5h-4z"/>
+
+  <path style="fill:none;" d="m2 6h20l-2 13h-17z"/>
+  <rect height="16" width="20" y="7" x="2" style="fill:#cfcfcf;"/>
+
+  <path style="fill:#ecf0f1;" d="m5 17c-0.5523 0-1 0.4-1 1v2c0 0.5 0.4477 1 1 1h6c0.552 0 1-0.5 1-1v-2c0-0.6-0.448-1-1-1h-6z"/>
+  <path style="fill:#26ba89;" d="m9 7v6 1l1-1 1 1 1-1 1 1 1-1 1 1v-1-6h-6z"/>
+
+  <rect height="2" width="1" y="18" x="5" style="fill:#95a5a6;"/>
+  <rect height="2" width="1" y="18" x="7" style="fill:#95a5a6;"/>
+  <rect height="2" width="1" y="18" x="9" style="fill:#95a5a6;"/>
+  <rect height="2" width="1" y="18" x="10" style="fill:#7f8c8d;"/>
+  <rect height="2" width="1" y="18" x="8" style="fill:#bdc3c7;"/>
+</svg>

@@ -1,0 +1,76 @@
+/* src/components/BasicTools/ProcessTool/ProcessTool.css */
+.process-tool {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  width: clamp(700px, 48vw, min(780px, calc(100vw - 30px))); /* Adjusted width to be narrower */
+  /* Adjust height as needed, or make it content-dependent */
+  min-height: 600px; /* Adjusted min-height to be even taller */
+  background-color: rgba(46, 52, 64, 0.85); /* Similar to SettingsPanel */
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #ececec;
+  z-index: 1020; /* Ensure it's above the BackgroundFilter */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease,
+              transform 0.4s ease,
+              visibility 0s linear 0.4s; /* Delay visibility change for fade-out */
+  display: flex;
+  flex-direction: column;
+}
+
+.process-tool.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0s; /* Immediate visibility for fade-in */
+}
+
+.process-tool.hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -50%) scale(0.9);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s linear 0.4s;
+}
+
+
+.process-tool-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Optional: adds a subtle separator */
+}
+
+.process-tool-title {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 400;
+}
+
+.process-tool-close-button {
+  background: transparent;
+  border: none;
+  color: #ececec;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.process-tool-close-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.process-tool-close-button svg {
+  fill: currentColor;
+}

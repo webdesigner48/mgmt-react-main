@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske -->
+  <defs>
+    <clipPath id="circle-clip-dubai">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-dubai)">
+    
+    <!-- Grüner Streifen (oben) -->
+    <rect width="75" height="33.33" x="25" y="0" style="fill:#00732F;"/>
+    <!-- Weisser Streifen (mitte) -->
+    <rect width="75" height="33.33" x="25" y="33.33" style="fill:#FFFFFF;"/>
+    <!-- Schwarzer Streifen (unten) -->
+    <rect width="75" height="33.34" x="25" y="66.66" style="fill:#000000;"/>
+    <!-- Roter Streifen (links, vertikal) -->
+    <rect width="25" height="100" x="0" y="0" style="fill:#FF0000;"/>
+
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animierter Farbverlauf wie ein Ölgemälde</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Grundlegende Stile für die Seite */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            color: #1a202c;
+        }
+
+        body {
+            position: relative;
+            overflow: hidden;
+            background-color: #f0f8ff;
+        }
+
+        /* Der Kern des Effekts: ein Pseudo-Element für den Hintergrund */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -10%; 
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            z-index: -1;
+
+            background: 
+                radial-gradient(circle at 15% 25%, #a2d2ff 0%, #bde0fe 20%, transparent 50%),
+                radial-gradient(circle at 85% 30%, #ffffff 10%, #bde0fe 30%, transparent 60%),
+                radial-gradient(circle at 60% 80%, #a2d2ff 5%, #ffffff 25%, transparent 65%),
+                radial-gradient(circle at 30% 70%, #ffffff 15%, transparent 40%);
+            
+            filter: blur(100px);
+            animation: moveBackground 20s ease-in-out infinite;
+        }
+        
+        @keyframes moveBackground {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1.1);
+            }
+            50% {
+                transform: translate(20px, -30px) rotate(8deg) scale(1.2);
+            }
+            100% {
+                transform: translate(0, 0) rotate(0deg) scale(1.1);
+            }
+        }
+
+        /* Die wandernde Kugel */
+        .wandering-orb {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #fff4a3, #ffe66d 40%, transparent 70%);
+            filter: blur(100px);
+            opacity: 0;
+            animation: wanderAndFade 28s ease-in-out infinite;
+            z-index: 0; /* Liegt über dem Hintergrund, aber unter dem Inhalt */
+        }
+
+        @keyframes wanderAndFade {
+            0% { top: 5%; left: 5%; opacity: 0; }
+            25% { top: 5%; left: 5%; border-radius: 50% 60% 70% 40% / 60% 50% 40% 70%; opacity: 0.65; }
+            45% { top: 5%; left: 5%; opacity: 0.6; }
+            50% { top: 5%; left: 5%; opacity: 0; }
+            75% { top: 10%; left: 85%; border-radius: 70% 40% 50% 60% / 50% 60% 70% 40%; opacity: 0.65; }
+            95% { top: 10%; left: 85%; opacity: 0.6; }
+            100% { top: 10%; left: 85%; opacity: 0; }
+        }
+
+        /* Container für die Welle */
+        .wave-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 280px;
+            z-index: 0;
+            filter: blur(100px);
+            overflow: hidden; /* Verhindert, dass die Welle über den Rand hinausragt */
+        }
+        
+        /* Die Welle selbst wird animiert */
+        .wave-svg {
+            width: 200%; /* SVG doppelt so breit wie der Container für nahtlose Bewegung */
+            height: 100%;
+            animation: animateWaveSvg 25s ease-in-out infinite alternate; /* Animation hier angewendet */
+        }
+        
+        /* Animation, die die SVG-Welle direkt steuert */
+        @keyframes animateWaveSvg {
+            from {
+                opacity: 0;
+                transform: translateX(0%); /* Startet am Anfang der Welle */
+            }
+            25% {
+                opacity: 0.7;
+            }
+            75% {
+                opacity: 0.7;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%); /* Bewegt die Welle um eine Bildschirmbreite nach links */
+            }
+        }
+
+        /* Ein Container für den Inhalt, um ihn zu zentrieren */
+        .content-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 2rem;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1; /* Stellt sicher, dass der Inhalt über allen Animationen liegt */
+        }
+
+        /* Verbesserte Glas-Optik mit Ihren Anpassungen */
+        .card {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            /* Dunklerer Rand */
+            border: 1px solid rgba(200, 215, 230, 0.4);
+            /* Weniger dunkler, aber schärferer Schatten */
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.15);
+            padding: 2rem 3rem;
+            text-align: center;
+            max-width: 600px;
+        }
+
+        h1 { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem;
+            /* Subtilerer Schatten, direkt hinter den Buchstaben */
+            text-shadow: 0 0 8px rgba(0,0,0,0.2);
+            /* Spiegelung ohne Abstand */
+            -webkit-box-reflect: below -15px linear-gradient(to bottom, transparent 45%, rgba(255, 255, 255, 0.08));
+        }
+        p { 
+            font-size: 1.125rem; 
+            line-height: 1.6; 
+            /* Subtilerer Schatten, direkt hinter den Buchstaben */
+            text-shadow: 0 0 8px rgba(0,0,0,0.2);
+            /* Spiegelung ohne Abstand */
+            -webkit-box-reflect: below -10px linear-gradient(to bottom, transparent 50%, rgba(255, 255, 255, 0.05));
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="wandering-orb"></div>
+
+    <div class="wave-container">
+        <!-- Die SVG-Welle selbst -->
+        <svg class="wave-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+            <path fill="#8abcfd" fill-opacity="0.8" d="M0,192C480,128,960,256,1440,192L1440,320L0,320Z"></path>
+        </svg>
+    </div>
+
+    <div class="content-container">
+        <div class="card">
+            <h1>Sanfter Farbverlauf</h1>
+            <p>Dieser Hintergrund wurde mit reinem CSS erstellt. Er nutzt mehrere überlagerte radiale Farbverläufe und einen Weichzeichner-Filter, um einen organischen und malerischen Effekt zu erzeugen.</p>
+        </div>
+    </div>
+
+</body>
+</html>

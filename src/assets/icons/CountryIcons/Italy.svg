@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske, um die Streifen zuzuschneiden -->
+  <defs>
+    <clipPath id="circle-clip-italy">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flaggenstreifen, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-italy)">
+    <!-- Grüner Streifen (links) -->
+    <rect width="33.33" height="100" x="0" style="fill:#008C45;"/>
+    <!-- Weisser Streifen (mitte) -->
+    <rect width="33.33" height="100" x="33.33" style="fill:#FFFFFF;"/>
+    <!-- Roter Streifen (rechts) -->
+    <rect width="33.34" height="100" x="66.66" style="fill:#CD212A;"/>
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  
+  <!-- Weisser Hintergrund (wird vom äusseren Kreis verdeckt, dient als Basis) -->
+  <circle cx="50" cy="50" r="50" style="fill:#FFFFFF;"/>
+  
+  <!-- Roter Sonnen-Diskus (Hinomaru) -->
+  <circle cx="50" cy="50" r="30" style="fill:#BC002D;"/>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

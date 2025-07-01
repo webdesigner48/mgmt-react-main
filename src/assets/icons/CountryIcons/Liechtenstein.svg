@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" height="64" width="64" viewBox="0 0 100 100">
+  <!-- Definiert eine runde Maske, um die Streifen und die Krone zuzuschneiden -->
+  <defs>
+    <clipPath id="circle-clip-liechtenstein">
+      <circle cx="50" cy="50" r="50"/>
+    </clipPath>
+  </defs>
+
+  <!-- Gruppe für die Flagge, die von der runden Maske zugeschnitten wird -->
+  <g clip-path="url(#circle-clip-liechtenstein)">
+    <!-- Blauer Streifen (oben) -->
+    <rect width="100" height="50" y="0" style="fill:#002780;"/>
+    <!-- Roter Streifen (unten) -->
+    <rect width="100" height="50" y="50" style="fill:#CF0921;"/>
+    
+    <!-- Goldene Fürstenkrone -->
+    <!-- Die Krone wird skaliert und im oberen linken Bereich positioniert -->
+    <g transform="translate(18, 15) scale(0.07)">
+      <path style="fill:#FFD100;" d="M256,0C178.6,0,112.5,23.3,69.2,60.2L128,213.3l42.7-32l-21.3-96C192,74.7,224,64,256,64s64,10.7,106.7,21.3l-21.3,96 l42.7,32L442.8,60.2C399.5,23.3,333.4,0,256,0z M128,256l-42.7,64h341.3l-42.7-64H128z M42.7,426.7C17.1,384,0,320,0,256h85.3 L128,320l-21.3,96L42.7,426.7z M469.3,426.7L405.3,416l-21.3-96l42.7-64h85.3C512,320,494.9,384,469.3,426.7z M256,448 c-35.3,0-64-28.7-64-64s28.7-64,64-64s64,28.7,64,64S291.3,448,256,448z"/>
+    </g>
+  </g>
+
+  <!-- Feiner Rand um den Kreis -->
+  <circle 
+    style="fill:none; stroke:#333333; stroke-width:2;" 
+    cx="50" 
+    cy="50" 
+    r="49"
+  />
+</svg>

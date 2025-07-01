@@ -1,0 +1,156 @@
+.add-personel-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1030; /* Consistent with ConfirmationPopup */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+  backdrop-filter: blur(3px); /* Optional: if BackgroundFilter is not used or for layered effect */
+  background-color: rgba(0, 0, 0, 0.3); /* Slight overlay for the popup itself */
+}
+
+.add-personel-popup-overlay.fade-in {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s linear 0s;
+}
+
+.add-personel-popup-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.add-personel-popup-container {
+  background-color: #2f3640; /* Dark theme, similar to TablePersonel */
+  padding: 20px 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+  color: #ececec;
+  font-family: inherit;
+  width: 90%;
+  max-width: 550px; /* Max width for the popup */
+  border: 1px solid rgba(236, 236, 236, 0.1);
+  position: relative; /* For absolute positioning of close button */
+}
+
+.add-personel-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.1);
+}
+
+.add-personel-popup-header h2 {
+  margin: 0;
+  font-size: 1.4em;
+  font-weight: 500;
+  color: #d1d8e0; /* Lighter title color */
+}
+
+.add-personel-close-button {
+  background: none;
+  border: none;
+  color: #aeb8c2; /* Muted color for close icon */
+  font-size: 1.2em; /* Adjust if SVG size is controlled by width/height */
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.add-personel-close-button:hover {
+  color: #ececec; /* Brighter on hover */
+}
+
+.add-personel-popup-form .form-group {
+  margin-bottom: 18px;
+}
+
+.add-personel-popup-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.95em;
+  color: #aeb8c2; /* Lighter label color */
+}
+
+.add-personel-popup-form input[type="text"],
+.add-personel-popup-form input[type="email"],
+.add-personel-popup-form select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #4a5568; /* Darker border */
+  border-radius: 6px;
+  background-color: #1e2732; /* Dark input background */
+  color: #ececec;
+  font-size: 1em;
+  box-sizing: border-box; /* Important for width 100% */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-personel-popup-form input[type="text"]:focus,
+.add-personel-popup-form input[type="email"]:focus,
+.add-personel-popup-form select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(90, 155, 211, 0.3);
+}
+
+.add-personel-popup-form select {
+  appearance: none; /* For custom arrow styling if desired */
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23aeb8c2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.4-5.4-13z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px;
+  padding-right: 35px; /* Make space for arrow */
+}
+
+.add-personel-popup-buttons {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(236, 236, 236, 0.1);
+}
+
+.add-personel-popup-buttons .popup-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-left: 10px;
+}
+
+.add-personel-popup-buttons .popup-button.save {
+  background-color: rgba(74, 141, 132, 0.7);
+  color: white;
+}
+
+.add-personel-popup-buttons .popup-button.save:hover {
+  background-color: rgba(74, 141, 132, 0.9);
+  transform: scale(1.03);
+}
+
+.add-personel-popup-buttons .popup-button.cancel {
+  background-color: #718093; /* Grey for cancel */
+  color: #ececec;
+}
+
+.add-personel-popup-buttons .popup-button.cancel:hover {
+  background-color: #5a6878;
+  transform: scale(1.03);
+}
+
+/* Placeholder styling for Kapazität '%' - can be handled in JS or with ::after if needed */
+/* For now, ensure input allows text */
