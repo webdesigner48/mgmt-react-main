@@ -428,7 +428,7 @@ const ViewUnternehmen: React.FC<Props> = ({
     return (
       <>
         <div className="unternehmen-header">
-          <h1>Unternehmen</h1>
+          <h1 className="">Unternehmen</h1>
           <div className="loading-indicator">
             <div className="spinner"></div>
             <span>Laden...</span>

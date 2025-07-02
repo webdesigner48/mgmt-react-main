@@ -135,8 +135,7 @@ export const DesignSection: React.FC<DesignSectionProps> = ({
           style={{
             width: '50%',
             minHeight: '120px',
-            background: fontStates.fontWhite || '#fff',
-            color: fontStates.fontBlack || '#222',
+            
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',

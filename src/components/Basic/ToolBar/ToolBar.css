@@ -27,7 +27,7 @@
 
   .toolbar.expanded {
     width: 250px !important; /* Ensure expanded width on narrow screens, further reduced by 50px */
-    background-color: #2a2f3a !important; /* Ensure background is visible when expanded */
+     /* Ensure background is visible when expanded */
   }
 }
 

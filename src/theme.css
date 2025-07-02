@@ -89,6 +89,50 @@
   background-color: transparent;
 }
 
+/* Light Theme Overrides */
+.light-theme .main-docs {
+  background-color: #e5e5e5;
+  border: 1px solid #cccccc;
+}
+
+.light-theme .main-docs:hover {
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Overlay on hover */
+.light-theme .main-docs-overlay-top:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(5px);
+  color: #222; /* text color when visible */
+}
+
+/* Bottom overlay text color */
+.light-theme .main-docs-overlay-bottom p {
+  color: #333;
+}
+
+/* Bottom overlay text hover */
+.light-theme .main-docs:hover .main-docs-overlay-bottom p {
+  color: #191919;
+}
+
+/* Dots icon */
+.light-theme .three-dots-icon {
+  fill: #333;
+}
+
+/* Text inside overlay default hidden */
+.light-theme .main-docs-overlay-top p {
+  color: #4f4f4f;
+}
+
+.light-theme .main-docs-overlay-top:has(.three-dots-icon:hover) {
+  text-shadow: none;
+}
+
+
+
+
 .light-theme .toolbar.expanded {
   background-color: var(--bg-sidebar);
 }
@@ -940,6 +984,7 @@
   background-color: var(--bg-modal) !important;
   color: var(--text-primary) !important;
   border: 1px solid var(--border-primary) !important;
+  border-radius: 12px !important;
 }
 
 .light-theme .drop-tool-header {
@@ -1052,10 +1097,13 @@
 
 /* Generic popup tool styling for any similar components */
 .light-theme [class*="-tool"]:not([class*="toolbar"]) {
-  background-color: var(--bg-modal) !important;
+  background-color: var(--bg-modal);
   color: var(--text-primary) !important;
   border: 1px solid var(--border-primary) !important;
+  border-radius: 12px;
 }
+
+
 
 .light-theme [class*="-tool-header"] {
   border-bottom-color: var(--border-primary) !important;
@@ -1186,7 +1234,7 @@
 .glass-theme .sidebar {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  --webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
 }
@@ -1198,12 +1246,35 @@
   border-left: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.glass-theme .grid-icon-button.expanded {
+    background: rgba(255, 255, 255, 0.12);
+    opacity: 1;
+}
+
+.glass-theme .grid-icon-button{
+   background-color: transparent;
+    opacity: 1;
+}
+
+.glass-theme .fullscreen-button:hover {
+   background: rgba(255, 255, 255, 0.12);
+}
+
 .glass-theme .admin-panel {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+}
+
+.glass-theme .filters-section, .sorting-section, .sort-btn, .view-toggle {
+  background: none;
+  
+}
+
+.glass-theme .admin-panel h1 {
+  background: transparent;
 }
 
 .glass-theme .content-rectangle {
@@ -1229,9 +1300,26 @@
 .glass-theme .add-personel-popup-container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  --webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-theme .processes-rectangle-red {
+   background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  --webkit-backdrop-filter: blur(20px);
+    
+    box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.glass-theme .processes-rectangle {
+   border: 1px solid rgba(255, 255, 255, 0.3);
+   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.37),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
@@ -1241,9 +1329,9 @@
 .glass-theme input[type="email"],
 .glass-theme select,
 .glass-theme textarea {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  --webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #ffffff;
 }
@@ -1305,6 +1393,8 @@
   color: rgba(255, 255, 255, 0.95);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
+
+
 
 .glass-theme .main-input-area textarea {
   background: rgba(255, 255, 255, 0.1);
@@ -1812,12 +1902,20 @@
 }
 
 .glass-theme .company-data-popup-header {
-   background: rgba(255, 255, 255, 0.1) !important;
+   background: rgba(255, 255, 255, 0.0) !important;
 }
 
 .glass-theme .popup-sidebar-nav__list li.active {
  background:none;
  color: white;
+}
+
+.glass-theme .design-logo-placeholder {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.glass-theme .total-work-time-display {
+  background: none;
 }
 
 /* ============================================ */
@@ -2035,9 +2133,9 @@
 }
 
 .glass-theme .admin-home-modal {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
+  --webkit-backdrop-filter: blur(25px) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.4),
@@ -2075,6 +2173,7 @@
 /* Admin Sidebar Glass Theme */
 .glass-theme .sidebar-admin {
   background: rgba(255, 255, 255, 0.1) !important;
+  
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
