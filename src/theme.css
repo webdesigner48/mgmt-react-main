@@ -1261,9 +1261,9 @@
 }
 
 .glass-theme .admin-panel {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.1);
+  /* backdrop-filter: blur(15px); */
+  --webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
 }
@@ -1546,7 +1546,7 @@
 
 /* DropTool Glass Theme */
 .glass-theme .drop-tool {
-  background: rgba(255, 255, 255, 0.15) !important;
+  /* background: rgba(255, 255, 255, 0.15) !important; */
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -1706,7 +1706,7 @@
 
 /* Generic popup tool styling for glass theme */
 .glass-theme [class*="-tool"]:not([class*="toolbar"]) {
-  background: rgba(255, 255, 255, 0.15) !important;
+  /* background: rgba(255, 255, 255, 0.15) !important; */
   /* backdrop-filter: blur(20px) !important; */
   /* -webkit-backdrop-filter: blur(20px) !important; */
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
@@ -1714,16 +1714,19 @@
     0 8px 32px rgba(31, 38, 135, 0.4),
     inset 0 2px 0 rgba(255, 255, 255, 0.2) !important;
   color: #ffffff !important;
+  border-radius: 12px;
 }
+
 
 .glass-theme [class*="-tool-header"] {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  /* background: rgba(255, 255, 255, 0.1) !important; */
 }
 
 .glass-theme [class*="-tool-title"] {
   color: #ffffff !important;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 0px !important;
 }
 
 .glass-theme [class*="-tool-close-button"] {
@@ -2132,7 +2135,7 @@
   -webkit-backdrop-filter: blur(15px) !important;
 }
 
-.glass-theme .admin-home-modal {
+/* .glass-theme .admin-home-modal {
   background: rgba(255, 255, 255, 0.1) !important;
   backdrop-filter: blur(25px) !important;
   --webkit-backdrop-filter: blur(25px) !important;
@@ -2140,7 +2143,7 @@
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.4),
     inset 0 2px 0 rgba(255, 255, 255, 0.2) !important;
-}
+} */
 
 .glass-theme .admin-home-header {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -2170,12 +2173,21 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
 }
 
+.table-personel-container-with-sidebar {
+  background: none;
+}
+
+.table-personel-header {
+  background: none;
+  border-bottom: 1px solid whitesmoke;
+}
+
 /* Admin Sidebar Glass Theme */
 .glass-theme .sidebar-admin {
   background: rgba(255, 255, 255, 0.1) !important;
   
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  /* backdrop-filter: blur(4px) !important; */
+  --webkit-backdrop-filter: blur(20px) !important;
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.3),
