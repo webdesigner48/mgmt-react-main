@@ -95,7 +95,7 @@
   border-radius: 5px;
   font-size: 0.88em;
   white-space: nowrap; /* Ensures width is based on content */
-  z-index: 1001; /* Above sidebar */
+  z-index: 1010; /* Above sidebar */
   transform: scale(0.5); /* Initial size for the animation */
   transform-origin: top left; /* Scale from the top-left corner */
   /* Defines transitions for when the tooltip hides: opacity/transform animate, then visibility changes. */
