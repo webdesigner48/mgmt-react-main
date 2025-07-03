@@ -1257,6 +1257,10 @@
   box-shadow:none !important;
 }
 
+.glass-theme .settings-row .theme-option.active  {
+ background: rgba(255, 255, 255, 0.3);
+}
+
 .glass-theme .grid-icon-button{
    background-color: transparent;
     opacity: 1;
