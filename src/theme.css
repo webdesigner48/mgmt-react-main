@@ -1251,9 +1251,19 @@
     opacity: 1;
 }
 
+.glass-theme .knowhub-tool-menu, .glass-theme .knowhub-tool-menu-item {
+  border-radius: 0px !important;
+  border: none !important;
+  box-shadow:none !important;
+}
+
 .glass-theme .grid-icon-button{
    background-color: transparent;
     opacity: 1;
+}
+
+.glass-theme .burger-menu-button.expanded , .burger-menu-button:hover   {
+   background: rgba(255, 255, 255, 0.4);
 }
 
 .glass-theme .fullscreen-button:hover {
@@ -1431,6 +1441,10 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.glass-theme .fullscreen-button.active {
+ background: rgba(0, 0, 0, 0.1);
+}
+
 /* Glass theme tables */
 .glass-theme table {
   background: rgba(255, 255, 255, 0.05);
@@ -1529,7 +1543,6 @@
 .glass-theme .drop-tool,
 .glass-theme .process-tool,
 .glass-theme .to-dos-tool,
-.glass-theme .knowhub-container,
 .glass-theme .book-reader-container {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(25px);
@@ -1558,7 +1571,7 @@
 
 .glass-theme .drop-tool-header {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.1) !important;
+  /* background: rgba(255, 255, 255, 0.1) !important; */
 }
 
 .glass-theme .drop-tool-title {
@@ -1709,10 +1722,10 @@
   /* background: rgba(255, 255, 255, 0.15) !important; */
   /* backdrop-filter: blur(20px) !important; */
   /* -webkit-backdrop-filter: blur(20px) !important; */
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.4),
-    inset 0 2px 0 rgba(255, 255, 255, 0.2) !important;
+    inset 0 2px 0 rgba(255, 255, 255, 0.2);
   color: #ffffff !important;
   border-radius: 12px;
 }
@@ -1831,13 +1844,14 @@
 
 /* KnowHub tools glass theme updates */
 .glass-theme .knowhub-container {
-  background: rgba(255, 255, 255, 0.15) !important;
+  /* background: rgba(255, 255, 255, 0.15) !important; */
   backdrop-filter: blur(25px) !important;
   -webkit-backdrop-filter: blur(25px) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   box-shadow: 
     0 8px 32px rgba(31, 38, 135, 0.4),
     inset 0 2px 0 rgba(255, 255, 255, 0.2) !important;
+   border-radius: 12px; 
 }
 
 .glass-theme .knowhub-sidebar-internal {
@@ -2179,7 +2193,7 @@
 
 .table-personel-header {
   background: none;
-  border-bottom: 1px solid whitesmoke;
+  border-bottom: 1px solid rgba(236, 236, 236, 0.1);
 }
 
 /* Admin Sidebar Glass Theme */
